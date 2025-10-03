@@ -1,0 +1,27 @@
+# Python specific
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE and OS specific
+.idea/
+.vscode/
+.DS_Store
+
+# --- KEEP YOUR EXISTING DATA RULES ---
+# Data folders that should NOT be tracked
+1_data/02_processed_temp/
+1_data/03_final_datasets/
+
+# --- ADD THESE NEW RULES ---
+# Ignore raw data folders from the new structure
+data/
+
+# Ignore specific large model files (we will track best.pt with LFS)
+models/detection/weights/last.pt
+models/detection/yolov8s_*
+
+# Temporary files
+*.zip
+*.ipynb_checkpoints
