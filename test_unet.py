@@ -40,23 +40,23 @@ def test_segmentation_locally():
             
         if files_found:
             sample_image_path = files_found[0] # Pick the first one
-            print(f"✅ Found image in '{subfolder}' folder: {os.path.basename(sample_image_path)}")
+            print(f"Found image in '{subfolder}' folder: {os.path.basename(sample_image_path)}")
             break
     
     if not sample_image_path:
-        print(f"❌ CRITICAL ERROR: Could not find any images in {UNET_IMG_ROOT}")
+        print(f"CRITICAL ERROR: Could not find any images in {UNET_IMG_ROOT}")
         print("   Please check: Did you run 'prepare_unet_data.py' locally?")
         return
 
     # Check Model
     if not os.path.exists(MODEL_PATH):
-        print(f"❌ Error: Model file not found at '{MODEL_PATH}'")
+        print(f"Error: Model file not found at '{MODEL_PATH}'")
         return
 
     # ==========================================
     # 3. LOAD MODEL
     # ==========================================
-    print(f"🔄 Loading model...")
+    print(f"Loading model...")
     model = smp.Unet(encoder_name="resnet34", encoder_weights=None, in_channels=3, classes=1)
     
     try:
@@ -64,7 +64,7 @@ def test_segmentation_locally():
         model.to(DEVICE)
         model.eval()
     except Exception as e:
-        print(f"❌ Error loading model: {e}")
+        print(f"Error loading model: {e}")
         return
 
     # ==========================================
@@ -108,7 +108,7 @@ def test_segmentation_locally():
     save_path = os.path.join(OUTPUT_DIR, f"test_result.jpg")
     cv2.imwrite(save_path, final_output)
 
-    print(f"\n🎉 Success! Check the result at: {save_path}")
+    print(f"\nSuccess! Check the result at: {save_path}")
 
 if __name__ == '__main__':
     test_segmentation_locally()

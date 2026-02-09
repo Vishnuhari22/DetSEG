@@ -12,3 +12,5 @@ seaborn
 scikit-learn
 pyyaml
 tqdm
+gradio>=4.0
+albumentations

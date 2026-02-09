@@ -43,7 +43,7 @@ def test_model_locally():
         # Save the image with bounding boxes
         save_path = os.path.join(output_dir, 'local_test_output.jpg')
         r.save(filename=save_path)
-        print(f"\n✅ Success! Output image saved to '{save_path}'")
+        print(f"\n Success! Output image saved to '{save_path}'")
 
 if __name__ == '__main__':
     test_model_locally()

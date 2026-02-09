@@ -146,7 +146,7 @@ def create_unet_patches(args):
                  print(f"Error saving image/mask for '{base_filename}': {e}. Skipping.")
 
 
-    print("\n✅ U-Net patch generation complete!")
+    print("\nU-Net patch generation complete!")
     print(f"   Processed data saved in:")
     print(f"     - Images: '{os.path.join(args.processed_dir, 'unet_images')}'")
     print(f"     - Masks:  '{os.path.join(args.processed_dir, 'unet_masks')}'")
