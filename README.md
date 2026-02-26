@@ -11,7 +11,7 @@ Follow these steps **in order** to get the project running on your machine.
 ### Step 1 — Clone the Repository
 
 ```bash
-git clone https://github.com/Vishnuhari22/polyp_detection_project.git
+git clone https://github.com/Vishnuhari22/DetSEG.git
 cd DetSEG
 ```
 
