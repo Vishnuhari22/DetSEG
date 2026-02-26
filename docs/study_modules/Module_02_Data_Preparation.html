@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Module_02_Data_Preparation</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="module-2-data-preparation">📘 Module 2: Data Preparation</h1>
+<h2
+id="understanding-how-we-prepare-medical-image-data-for-ai-training">Understanding
+How We Prepare Medical Image Data for AI Training</h2>
+<hr />
+<h2 id="why-is-data-preparation-so-important">2.1 Why Is Data
+Preparation So Important?</h2>
+<p>AI models don’t understand raw folders of images directly. We need
+to: 1. <strong>Label</strong> the data in formulas that AI tools can use
+(YOLO format labels) 2. <strong>Split</strong> the data into training,
+validation, and testing sets 3. <strong>Crop and resize</strong> images
+to a fixed size for the segmentation model</p>
+<p>These three tasks are handled by three separate Python scripts:</p>
+<table>
+<thead>
+<tr>
+<th>Script</th>
+<th>Job</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bbox_generator.py</code></td>
+<td>Convert masks → YOLO bounding box labels</td>
+</tr>
+<tr>
+<td><code>data_splitter.py</code></td>
+<td>Organize and split data into train/val/test</td>
+</tr>
+<tr>
+<td><code>unet_data_generator.py</code></td>
+<td>Crop polyp regions and resize for U-Net</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="script-1-bbox_generator.py-generating-labels-from-masks">2.2
+Script 1: <code>bbox_generator.py</code> — Generating Labels from
+Masks</h2>
+<h3 id="the-problem-it-solves">The Problem It Solves</h3>
+<p>We have <strong>ground-truth segmentation masks</strong> (the white
+blobs showing polyp location), but YOLO needs <strong>bounding box
+labels</strong> in a specific text format. This script bridges the
+gap:</p>
+<pre><code>INPUT:  A mask image (binary image with white blob = polyp)
+OUTPUT: A .txt file (YOLO format) and a CSV with raw coordinates</code></pre>
+<h3 id="the-yolo-label-format">The YOLO Label Format</h3>
+<p>Each line in a YOLO <code>.txt</code> file means one detected
+object:</p>
+<pre><code>&lt;class_id&gt; &lt;x_center&gt; &lt;y_center&gt; &lt;width&gt; &lt;height&gt;</code></pre>
+<p>All values (except class_id) are <strong>normalized</strong> between
+0 and 1 (relative to image size): - If the image is 400px wide and the
+polyp center is at x=200px, then x_center = 200/400 =
+<strong>0.5</strong> - Example:
+<code>0 0.502345 0.481234 0.312500 0.287500</code> - <code>0</code> =
+class 0 (polyp) - <code>0.502345</code> = center x is 50.2% from left
+edge - <code>0.481234</code> = center y is 48.1% from top - etc.</p>
+<hr />
+<h3 id="bbox_generator.py-line-by-line-explanation">📄
+<code>bbox_generator.py</code> — Line-by-Line Explanation</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os      <span class="co"># For file and directory operations</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cv2     <span class="co"># OpenCV – computer vision library for reading/processing images</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> csv     <span class="co"># For writing data in CSV (spreadsheet) format</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> argparse  <span class="co"># For accepting command-line arguments (like --mask-dir)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tqdm <span class="im">import</span> tqdm  <span class="co"># Creates a progress bar in the terminal</span></span></code></pre></div>
+<p><strong>Imports</strong>: These are the tools we bring into our
+script. - <code>os</code>: handles file paths like
+<code>os.path.join("data", "masks")</code> → <code>"data/masks"</code> -
+<code>cv2</code>: reads images, finds edges/contours, draws boxes -
+<code>csv</code>: writes comma-separated values (spreadsheet-like) files
+- <code>argparse</code>: lets users run the script with options:
+<code>python bbox_generator.py --mask-dir my_masks/</code> -
+<code>tqdm</code>: shows <code>[=====&gt;   ] 45%</code> progress bars
+while processing hundreds of images</p>
+<hr />
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> generate_bbox_from_mask(mask_path, class_id<span class="op">=</span><span class="dv">0</span>):</span></code></pre></div>
+<p><strong>Function definition</strong>: This function takes: -
+<code>mask_path</code> (str): The full file path to one mask image -
+<code>class_id=0</code>: The default class is 0 (polyp). The
+<code>=0</code> means if you don’t provide it, it defaults to 0.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>    mask <span class="op">=</span> cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)</span></code></pre></div>
+<p><strong>Read mask as grayscale</strong>: Loads the mask image as a 2D
+array of numbers. Each pixel is 0 (black=background) or 255
+(white=polyp). The flag <code>cv2.IMREAD_GRAYSCALE</code> tells OpenCV
+to ignore color and just read brightness.</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> mask <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f&quot;Warning: Could not read mask </span><span class="sc">{</span>mask_path<span class="sc">}</span><span class="ss">. Skipping.&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [], []</span></code></pre></div>
+<p><strong>Safety check</strong>: If the file doesn’t exist or is
+corrupted, <code>cv2.imread</code> returns <code>None</code>. We check
+for this and skip gracefully (return empty lists <code>[]</code>).</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    H, W <span class="op">=</span> mask.shape</span></code></pre></div>
+<p><strong>Get image dimensions</strong>: <code>mask.shape</code>
+returns <code>(height, width)</code> for a grayscale image. We store
+these as <code>H</code> and <code>W</code> because we’ll need them to
+calculate normalized coordinates.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>    contours, _ <span class="op">=</span> cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)</span></code></pre></div>
+<p><strong>Find contours</strong>: This is the heart of the function. A
+<strong>contour</strong> is the boundary/outline of a white region. -
+<code>cv2.RETR_EXTERNAL</code>: Only find the outermost contours (we
+don’t want “holes” inside polyps) -
+<code>cv2.CHAIN_APPROX_SIMPLE</code>: Store only the key corner points
+of the boundary (not every single pixel), which saves memory - The
+<code>_</code> captures the hierarchy info we don’t need, so we discard
+it.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> contour <span class="kw">in</span> contours:</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> cv2.contourArea(contour) <span class="op">&lt;</span> <span class="dv">20</span>:  <span class="co"># Minimum pixel area threshold</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>            <span class="cf">continue</span></span></code></pre></div>
+<p><strong>Filter tiny noise</strong>: The mask might have tiny specks
+(noise) that aren’t real polyps. <code>cv2.contourArea()</code>
+calculates the area in pixels². We skip any contour smaller than 20
+pixels² because that’s likely noise, not a polyp.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>        x, y, w, h <span class="op">=</span> cv2.boundingRect(contour)</span></code></pre></div>
+<p><strong>Get bounding box</strong>: <code>cv2.boundingRect</code>
+calculates the smallest axis-aligned rectangle around the contour and
+returns: - <code>x</code>, <code>y</code>: top-left corner coordinates
+(in pixels) - <code>w</code>, <code>h</code>: width and height (in
+pixels)</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>        raw_bboxes.append({<span class="st">&#39;x&#39;</span>: x, <span class="st">&#39;y&#39;</span>: y, <span class="st">&#39;w&#39;</span>: w, <span class="st">&#39;h&#39;</span>: h})</span></code></pre></div>
+<p><strong>Store raw coordinates</strong>: We save the pixel coordinates
+to a dictionary and add it to the list. These will be saved to CSV for
+use by the U-Net data generator.</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>        x_center <span class="op">=</span> (x <span class="op">+</span> w <span class="op">/</span> <span class="dv">2</span>) <span class="op">/</span> W</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>        y_center <span class="op">=</span> (y <span class="op">+</span> h <span class="op">/</span> <span class="dv">2</span>) <span class="op">/</span> H</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        norm_width <span class="op">=</span> w <span class="op">/</span> W</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        norm_height <span class="op">=</span> h <span class="op">/</span> H</span></code></pre></div>
+<p><strong>Convert to normalized YOLO format</strong>: -
+<code>x + w/2</code> = pixel position of the center (left corner + half
+width) - Dividing by <code>W</code> (image width) normalizes it to 0–1
+range - Same logic for y_center, width, and height</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>        x_center <span class="op">=</span> <span class="bu">max</span>(<span class="fl">0.0</span>, <span class="bu">min</span>(<span class="fl">1.0</span>, x_center))</span></code></pre></div>
+<p><strong>Clamp values</strong>: This ensures values never go below 0.0
+or above 1.0. <code>max(0.0, ...)</code> ensures at least 0,
+<code>min(1.0, ...)</code> ensures at most 1. This prevents any floating
+point edge cases.</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>        yolo_labels.append(<span class="ss">f&quot;</span><span class="sc">{</span>class_id<span class="sc">}</span><span class="ss"> </span><span class="sc">{</span>x_center<span class="sc">:.6f}</span><span class="ss"> </span><span class="sc">{</span>y_center<span class="sc">:.6f}</span><span class="ss"> </span><span class="sc">{</span>norm_width<span class="sc">:.6f}</span><span class="ss"> </span><span class="sc">{</span>norm_height<span class="sc">:.6f}</span><span class="ss">&quot;</span>)</span></code></pre></div>
+<p><strong>Format YOLO label string</strong>: Creates a string like
+<code>"0 0.502000 0.481000 0.312500 0.287500"</code>. The
+<code>:.6f</code> means 6 decimal places.</p>
+<hr />
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_all_masks(raw_mask_dir, label_output_dir, csv_output_path):</span></code></pre></div>
+<p><strong>Main processing function</strong>: Processes ALL masks in a
+directory, not just one.</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>    os.makedirs(label_output_dir, exist_ok<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<p><strong>Create output directory</strong>: <code>os.makedirs</code>
+creates the folder. <code>exist_ok=True</code> means don’t raise an
+error if the folder already exists.</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>    mask_files <span class="op">=</span> [f <span class="cf">for</span> f <span class="kw">in</span> os.listdir(raw_mask_dir) <span class="cf">if</span> f.endswith((<span class="st">&#39;.png&#39;</span>, <span class="st">&#39;.jpg&#39;</span>, <span class="st">&#39;.jpeg&#39;</span>, <span class="st">&#39;.tif&#39;</span>))]</span></code></pre></div>
+<p><strong>List comprehension</strong>: This one line does the work of a
+for loop. It reads all files in the directory, but keeps ONLY image
+files (filtering by extension). Result:
+<code>['mask001.png', 'mask002.png', ...]</code></p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(csv_output_path, <span class="st">&#39;w&#39;</span>, newline<span class="op">=</span><span class="st">&#39;&#39;</span>) <span class="im">as</span> csvfile:</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>        fieldnames <span class="op">=</span> [<span class="st">&#39;filename&#39;</span>, <span class="st">&#39;x&#39;</span>, <span class="st">&#39;y&#39;</span>, <span class="st">&#39;w&#39;</span>, <span class="st">&#39;h&#39;</span>]</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>        writer <span class="op">=</span> csv.DictWriter(csvfile, fieldnames<span class="op">=</span>fieldnames)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        writer.writeheader()</span></code></pre></div>
+<p><strong>Open CSV for writing</strong>: <code>with open(...)</code>
+ensures file is properly closed after use. <code>DictWriter</code>
+allows writing dictionaries (key-value pairs) as rows.
+<code>writeheader()</code> writes the column names as the first row.</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> mask_filename <span class="kw">in</span> tqdm(mask_files, desc<span class="op">=</span><span class="st">&quot;Generating Bounding Boxes&quot;</span>):</span></code></pre></div>
+<p><strong>Loop with progress bar</strong>: <code>tqdm</code> wraps the
+list and shows a progress bar. <code>desc=</code> sets the label shown
+on the progress bar.</p>
+<hr />
+<h2 id="script-2-data_splitter.py-organizing-data-into-trainvaltest">2.3
+Script 2: <code>data_splitter.py</code> — Organizing Data into
+Train/Val/Test</h2>
+<h3 id="why-do-we-split-data">Why Do We Split Data?</h3>
+<p>Neural networks learn by seeing examples (<strong>training
+set</strong>). But we need to know whether the model actually
+<em>understood</em> the concept or just <em>memorized</em> the data. We
+use:</p>
+<table>
+<thead>
+<tr>
+<th>Split</th>
+<th>Proportion</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Training</strong></td>
+<td>80%</td>
+<td>The model learns patterns from this data</td>
+</tr>
+<tr>
+<td><strong>Validation</strong></td>
+<td>10%</td>
+<td>Monitor training; tune hyperparameters</td>
+</tr>
+<tr>
+<td><strong>Test</strong></td>
+<td>10%</td>
+<td>Final unbiased evaluation of model quality</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Analogy</strong>: Training set = Your textbook. Validation
+set = Practice exams while studying. Test set = The final exam (only
+opened after studying is done).</p>
+</blockquote>
+<h3 id="key-concept-random.seed42">Key Concept:
+<code>random.seed(42)</code></h3>
+<p>When you shuffle a list randomly, the result changes every time you
+run the code. A <strong>seed</strong> makes the randomness reproducible
+— the same split every time. <code>42</code> is conventionally used
+(from “The Hitchhiker’s Guide to the Galaxy”).</p>
+<hr />
+<h3 id="data_splitter.py-line-by-line-explanation">📄
+<code>data_splitter.py</code> — Line-by-Line Explanation</h3>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> random   <span class="co"># Python&#39;s built-in random number generator</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> shutil   <span class="co"># High-level file operations (e.g., copy files)</span></span></code></pre></div>
+<ul>
+<li><code>random.shuffle()</code> randomly reorders a list</li>
+<li><code>shutil.copy(src, dst)</code> copies a file from source path to
+destination path</li>
+</ul>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> find_image_extension(image_dir, base_filename):</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> ext <span class="kw">in</span> [<span class="st">&#39;.jpg&#39;</span>, <span class="st">&#39;.png&#39;</span>, <span class="st">&#39;.jpeg&#39;</span>]:</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> os.path.exists(os.path.join(image_dir, base_filename <span class="op">+</span> ext)):</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> ext</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">None</span></span></code></pre></div>
+<p><strong>Helper function</strong>: Since images might be
+<code>.jpg</code> or <code>.png</code>, this tries each extension until
+it finds the file. Returns the extension string (e.g.,
+<code>'.jpg'</code>) or <code>None</code> if not found. -
+<code>os.path.join(image_dir, base_filename + ext)</code> builds a full
+path like <code>data/raw/images/cju0qkwl35piu0993l0dewei2.jpg</code> -
+<code>os.path.exists(...)</code> returns <code>True</code> if the file
+exists</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>    random.seed(<span class="dv">42</span>)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    random.shuffle(all_filenames)</span></code></pre></div>
+<p><strong>Reproducible shuffle</strong>: Sets the random seed then
+shuffles the filename list in-place (modifies the list directly). After
+this, the list is in a random-but-consistent order.</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>    train_end <span class="op">=</span> <span class="bu">int</span>(total_files <span class="op">*</span> args.split_ratios[<span class="dv">0</span>])   <span class="co"># e.g., 1000 * 0.8 = 800</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    val_end <span class="op">=</span> train_end <span class="op">+</span> <span class="bu">int</span>(total_files <span class="op">*</span> args.split_ratios[<span class="dv">1</span>])  <span class="co"># 800 + 100 = 900</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    train_files <span class="op">=</span> all_filenames[:train_end]    <span class="co"># First 800 items</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    val_files <span class="op">=</span> all_filenames[train_end:val_end]  <span class="co"># Items 800–899</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    test_files <span class="op">=</span> all_filenames[val_end:]       <span class="co"># Items 900–999</span></span></code></pre></div>
+<p><strong>Slice-based splitting</strong>: Python list slices
+<code>[start:end]</code> extract portions of a list. This is elegant and
+fast.</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>    os.makedirs(os.path.join(args.output_dir, <span class="st">&#39;images&#39;</span>, split_name), exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    os.makedirs(os.path.join(args.output_dir, <span class="st">&#39;labels&#39;</span>, split_name), exist_ok<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    os.makedirs(os.path.join(args.output_dir, <span class="st">&#39;masks&#39;</span>, split_name), exist_ok<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<p><strong>Create directory structure</strong>: For each of train, val,
+test — creates 3 folders each. Result:</p>
+<pre><code>data/processed/
+├── images/train/   ├── images/val/   ├── images/test/
+├── labels/train/   ├── labels/val/   ├── labels/test/
+└── masks/train/    └── masks/val/    └── masks/test/</code></pre>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>    shutil.copy(src_img_path, dest_img_path)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    shutil.copy(src_mask_path, dest_mask_path)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> os.path.exists(src_label_path):</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>        shutil.copy(src_label_path, dest_label_path)</span></code></pre></div>
+<p><strong>Copy files</strong>: <code>shutil.copy</code> copies the file
+<strong>bytes exactly</strong> to the new location. We check if the
+label exists first — some images might not have a polyp (empty/negative
+case), so label files might be absent.</p>
+<hr />
+<h2 id="script-3-unet_data_generator.py-preparing-patches-for-u-net">2.4
+Script 3: <code>unet_data_generator.py</code> — Preparing Patches for
+U-Net</h2>
+<h3 id="why-do-we-need-separate-patches-for-u-net">Why Do We Need
+Separate Patches for U-Net?</h3>
+<p>U-Net is trained to <strong>segment</strong> (outline) a polyp, not
+to find it. So: - Instead of giving U-Net the entire colonoscopy image
+(which is mostly normal tissue), we give it a <strong>cropped region
+centered on the polyp</strong> - We add padding around the bounding box
+so U-Net sees some context - We resize everything to <strong>256×256
+pixels</strong> (fixed size required by U-Net)</p>
+<pre><code>Full Image (e.g., 1280×960):          U-Net Patch (256×256):
++---------------------------+          +----------+
+|                           |          |          |
+|   +---------+             |   →      | [polyp]  |  ← Cropped, padded, resized
+|   | [POLYP] |             |          |          |
+|   +---------+             |          +----------+
++---------------------------+</code></pre>
+<h3 id="key-concept-why-two-interpolation-methods">Key Concept: Why Two
+Interpolation Methods?</h3>
+<p>When resizing an image, OpenCV needs to “invent” or “remove” pixels:
+- <strong><code>cv2.INTER_LINEAR</code></strong> (Bilinear) for images:
+Smooth blending of nearby pixels. Good for photographs where smooth
+color transitions are important. -
+<strong><code>cv2.INTER_NEAREST</code></strong> (Nearest Neighbor) for
+masks: Copies the nearest pixel exactly. Critical for masks because we
+need ONLY 0 or 255 — no blending that would create intermediate values
+like 127!</p>
+<hr />
+<h3 id="unet_data_generator.py-line-by-line-explanation">📄
+<code>unet_data_generator.py</code> — Line-by-Line Explanation</h3>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>    bbox_data <span class="op">=</span> {}</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> <span class="bu">open</span>(args.csv_path, <span class="st">&#39;r&#39;</span>, newline<span class="op">=</span><span class="st">&#39;&#39;</span>) <span class="im">as</span> csvfile:</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>        reader <span class="op">=</span> csv.DictReader(csvfile)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> row <span class="kw">in</span> reader:</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>            bbox_data[row[<span class="st">&#39;filename&#39;</span>]] <span class="op">=</span> {</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>                <span class="st">&#39;x&#39;</span>: <span class="bu">int</span>(row[<span class="st">&#39;x&#39;</span>]),</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>                <span class="st">&#39;y&#39;</span>: <span class="bu">int</span>(row[<span class="st">&#39;y&#39;</span>]),</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>                <span class="st">&#39;w&#39;</span>: <span class="bu">int</span>(row[<span class="st">&#39;w&#39;</span>]),</span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>                <span class="st">&#39;h&#39;</span>: <span class="bu">int</span>(row[<span class="st">&#39;h&#39;</span>])</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>            }</span></code></pre></div>
+<p><strong>Load bounding boxes from CSV</strong>: Reads the CSV created
+by <code>bbox_generator.py</code>. <code>csv.DictReader</code> reads
+each row as a dictionary keyed by column names. The result is a lookup
+dictionary:
+<code>{'cju0abc.png': {'x':100, 'y':50, 'w':80, 'h':60}, ...}</code></p>
+<p><code>int(row['x'])</code> converts the string <code>'100'</code>
+from the CSV to the integer <code>100</code>.</p>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>    x1 <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, x <span class="op">-</span> padding)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    y1 <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, y <span class="op">-</span> padding)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>    x2 <span class="op">=</span> <span class="bu">min</span>(img_W, x <span class="op">+</span> w <span class="op">+</span> padding)</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>    y2 <span class="op">=</span> <span class="bu">min</span>(img_H, y <span class="op">+</span> h <span class="op">+</span> padding)</span></code></pre></div>
+<p><strong>Add padding with boundary clipping</strong>: -
+<code>x - padding</code> = 20px to the left of the bounding box -
+<code>max(0, ...)</code> = never go below 0 (can’t crop outside the left
+edge of the image) - <code>x + w + padding</code> = 20px to the right of
+the bounding box - <code>min(img_W, ...)</code> = never exceed image
+width (can’t crop outside the right edge)</p>
+<p>This ensures the cropped region always stays inside the original
+image.</p>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>    cropped_image <span class="op">=</span> original_image[y1:y2, x1:x2]</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    cropped_mask <span class="op">=</span> original_mask[y1:y2, x1:x2]</span></code></pre></div>
+<p><strong>NumPy array slicing</strong>: OpenCV images are stored as
+NumPy arrays. Slicing <code>[y1:y2, x1:x2]</code> extracts a rectangular
+subarray. The order is <code>[rows, columns]</code> which maps to
+<code>[y, x]</code> in image coordinates.</p>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>    resized_image <span class="op">=</span> cv2.resize(cropped_image, output_size, interpolation<span class="op">=</span>cv2.INTER_LINEAR)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>    resized_mask <span class="op">=</span> cv2.resize(cropped_mask, output_size, interpolation<span class="op">=</span>cv2.INTER_NEAREST)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    _, resized_mask <span class="op">=</span> cv2.threshold(resized_mask, <span class="dv">127</span>, <span class="dv">255</span>, cv2.THRESH_BINARY)</span></code></pre></div>
+<p><strong>Resize and binarize</strong>: 1. Reset image to 256×256 with
+smooth interpolation 2. Reset mask to 256×256 with exact
+nearest-neighbor (no blending) 3.
+<code>cv2.threshold(..., 127, 255, cv2.THRESH_BINARY)</code> ensures
+mask is strictly binary: any value ≤127 becomes 0, any value ≥128
+becomes 255. The <code>_</code> discards the threshold value returned
+(we don’t need it).</p>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>    cv2.imwrite(out_img_path, resized_image)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>    cv2.imwrite(out_mask_path, resized_mask)</span></code></pre></div>
+<p><strong>Save as PNG</strong>: PNG format is <strong>lossless</strong>
+(no quality loss from compression). This is critical for masks — JPEG
+compression would blur the pixel values and corrupt the clean 0/255
+boundaries.</p>
+<hr />
+<h2 id="summary-data-flow-diagram">2.5 Summary: Data Flow Diagram</h2>
+<pre><code>data/raw/images/       data/raw/masks/
+      │                      │
+      └──────────────────────┘
+                 │
+         bbox_generator.py
+                 │
+      ┌──────────┴──────────┐
+      ▼                     ▼
+data/interim/labels/    data/interim/
+(YOLO .txt files)       bounding_boxes.csv
+      │                     │
+      └──────────┬──────────┘
+                 │
+         data_splitter.py
+                 │
+    ┌────────────┼────────────┐
+    ▼            ▼            ▼
+  train/       val/         test/
+(800 images) (100 images) (100 images)
+(YOLO use)      │
+                │
+        unet_data_generator.py
+                │
+    ┌───────────┴────────────┐
+    ▼                        ▼
+unet_images/train|val   unet_masks/train|val
+(256×256 PNG patches)   (256×256 binary masks)
+     (U-Net use)</code></pre>
+</body>
+</html>

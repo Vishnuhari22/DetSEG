@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Module_05_Inference_App</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="module-5-the-inference-pipeline-streamlit-app-app.py">📘 Module
+5: The Inference Pipeline — Streamlit App (<code>app.py</code>)</h1>
+<h2
+id="how-the-trained-models-are-used-together-in-a-real-application">How
+the Trained Models Are Used Together in a Real Application</h2>
+<hr />
+<h2 id="what-is-inference">5.1 What Is Inference?</h2>
+<p><strong>Inference</strong> = Using a trained model to make
+predictions on <strong>new, unseen data</strong>.</p>
+<p>During training, the model learns. During inference, the model
+applies what it learned. The <code>app.py</code> file is all about
+inference — it loads the trained YOLO and U-Net models, and runs them on
+user-uploaded colonoscopy images.</p>
+<hr />
+<h2 id="what-is-streamlit">5.2 What Is Streamlit?</h2>
+<p><strong>Streamlit</strong> is a Python library that turns Python
+scripts into interactive web applications with minimal code. Instead of
+building HTML/CSS/JavaScript, you just write Python and Streamlit
+automatically creates a web UI.</p>
+<pre><code>Normal Web App:              Streamlit App:
+HTML file                    Python script
+CSS file        →  →  →      (just one .py file!)
+JavaScript file
+Backend server</code></pre>
+<hr />
+<h2 id="app.py-complete-line-by-line-explanation">5.3
+<code>app.py</code> — Complete Line-by-Line Explanation</h2>
+<h3 id="section-1-imports">Section 1: Imports</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> streamlit <span class="im">as</span> st              <span class="co"># Web UI framework</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os                           <span class="co"># File/path operations</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> cv2                          <span class="co"># Image processing (OpenCV)</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np                  <span class="co"># Numerical arrays</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch                        <span class="co"># PyTorch for ML</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> segmentation_models_pytorch <span class="im">as</span> smp  <span class="co"># Pre-built U-Net with ResNet encoder</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> albumentations <span class="im">as</span> A          <span class="co"># Image augmentation/transform</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> albumentations.pytorch <span class="im">import</span> ToTensorV2  <span class="co"># numpy → PyTorch tensor</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ultralytics <span class="im">import</span> YOLO        <span class="co"># YOLOv8 detection</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> PIL <span class="im">import</span> Image               <span class="co"># Python Imaging Library (reads uploaded files)</span></span></code></pre></div>
+<p><strong>Note:
+<code>segmentation_models_pytorch (smp)</code></strong>: In the app, we
+use <code>smp.Unet</code> (a library version of U-Net with a pre-trained
+ResNet34 encoder) instead of our custom <code>unet_model.py</code>. This
+is because: - It provides a stronger encoder (ResNet34 pre-trained on
+ImageNet) - It’s plug-and-play for loading saved weights - Our training
+was done using <code>smp.Unet</code></p>
+<hr />
+<h3 id="section-2-configuration">Section 2: Configuration</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>st.set_page_config(page_title<span class="op">=</span><span class="st">&quot;Polyp Detect &amp; Seg&quot;</span>, page_icon<span class="op">=</span><span class="st">&quot;🩺&quot;</span>, layout<span class="op">=</span><span class="st">&quot;wide&quot;</span>)</span></code></pre></div>
+<p><strong>Page setup</strong>: Must be the very first Streamlit
+command. Sets the browser tab title, icon, and layout
+(<code>"wide"</code> = full browser width instead of a narrow centered
+column).</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>BASE_DIR <span class="op">=</span> os.path.dirname(os.path.dirname(os.path.abspath(<span class="va">__file__</span>)))</span></code></pre></div>
+<p><strong>Dynamic path resolution</strong>: <code>__file__</code> is
+the path to <code>app.py</code> itself. -
+<code>os.path.abspath(__file__)</code> =
+<code>/C:/Users/user/.../DetSEG/src/app.py</code> -
+<code>os.path.dirname(...)</code> once =
+<code>/C:/Users/user/.../DetSEG/src/</code> -
+<code>os.path.dirname(...)</code> twice =
+<code>/C:/Users/user/.../DetSEG/</code></p>
+<p>This finds the project root regardless of where you run the script
+from.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>YOLO_PATH <span class="op">=</span> os.path.join(BASE_DIR, <span class="st">&#39;models&#39;</span>, <span class="st">&#39;detection&#39;</span>, <span class="st">&#39;weights&#39;</span>, <span class="st">&#39;best.pt&#39;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>UNET_PATH <span class="op">=</span> os.path.join(BASE_DIR, <span class="st">&#39;models&#39;</span>, <span class="st">&#39;segmentation&#39;</span>, <span class="st">&#39;weights&#39;</span>, <span class="st">&#39;unet_best.pth&#39;</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>DEVICE <span class="op">=</span> <span class="st">&quot;cuda&quot;</span> <span class="cf">if</span> torch.cuda.is_available() <span class="cf">else</span> <span class="st">&quot;cpu&quot;</span></span></code></pre></div>
+<p><strong>Constants</strong>: - <code>YOLO_PATH</code>: Full path to
+the best YOLO weights from training - <code>UNET_PATH</code>: Full path
+to best U-Net weights - <code>DEVICE</code>: Automatically detects if a
+GPU is available (<code>"cuda"</code>) or falls back to CPU
+(<code>"cpu"</code>). All tensor operations must run on the same
+device.</p>
+<hr />
+<h3 id="section-3-model-loading">Section 3: Model Loading</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="at">@st.cache_resource</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_models():</span></code></pre></div>
+<p><strong><code>@st.cache_resource</code></strong>: This is a Python
+<strong>decorator</strong> — it modifies the function’s behavior.
+Streamlit re-runs the entire script every time the user interacts with
+the app. Without caching, models would reload on every button click
+(taking several seconds each time). <code>@st.cache_resource</code>
+caches the models in memory after the first load, so subsequent runs use
+the cached version instantly.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="kw">not</span> os.path.exists(YOLO_PATH):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>        st.error(<span class="ss">f&quot;❌ YOLO Model missing: </span><span class="sc">{</span>YOLO_PATH<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span>, <span class="va">None</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    yolo_model <span class="op">=</span> YOLO(YOLO_PATH)</span></code></pre></div>
+<p><strong>Safety first</strong>: Check that the weight file exists
+before trying to load it. If missing, show an error in the UI and return
+<code>None</code> — graceful failure, no crash.</p>
+<p><code>YOLO(YOLO_PATH)</code> loads the weights and the model
+architecture simultaneously. The Ultralytics library handles all the
+complexity.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>    unet_model <span class="op">=</span> smp.Unet(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>        encoder_name<span class="op">=</span><span class="st">&quot;resnet34&quot;</span>,  <span class="co"># Use ResNet34 as the encoder backbone</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        encoder_weights<span class="op">=</span><span class="va">None</span>,     <span class="co"># Don&#39;t download ImageNet weights (we have our own)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        in_channels<span class="op">=</span><span class="dv">3</span>,            <span class="co"># RGB input (3 channels)</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>        classes<span class="op">=</span><span class="dv">1</span>                 <span class="co"># 1 output class (binary segmentation)</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
+<p><strong>Creating U-Net with ResNet34 encoder</strong>: - ResNet34 is
+used as the <strong>encoder</strong> (feature extraction backbone)
+instead of our custom encoder - <code>encoder_weights=None</code>: We
+won’t initialize with ImageNet weights since we’ll load our trained
+weights next - <code>in_channels=3</code>: Input is RGB images -
+<code>classes=1</code>: Binary output (polyp vs. background)</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    unet_model.load_state_dict(torch.load(UNET_PATH, map_location<span class="op">=</span>DEVICE))</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    unet_model.to(DEVICE)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    unet_model.<span class="bu">eval</span>()</span></code></pre></div>
+<p><strong>Load weights</strong>: -
+<code>torch.load(UNET_PATH, map_location=DEVICE)</code>: Loads the saved
+weight dictionary. <code>map_location=DEVICE</code> ensures GPU-trained
+weights can load on CPU if no GPU is available. -
+<code>load_state_dict(...)</code>: Copies the saved weights into the
+model structure - <code>.to(DEVICE)</code>: Moves model parameters to
+GPU or CPU - <code>.eval()</code>: Switches model to <strong>evaluation
+mode</strong> (very important!). In eval mode: - BatchNorm uses stored
+running statistics (not per-batch) - Dropout (if any) is disabled This
+ensures consistent, deterministic predictions.</p>
+<hr />
+<h3 id="section-4-the-processing-pipeline">Section 4: The Processing
+Pipeline</h3>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> process_image(image, conf_threshold, iou_threshold):</span></code></pre></div>
+<p>This function runs the complete two-stage AI pipeline on one
+image.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>    img_np <span class="op">=</span> np.array(image)               <span class="co"># PIL Image → NumPy array (RGB)</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    original_bgr <span class="op">=</span> cv2.cvtColor(img_np, cv2.COLOR_RGB2BGR)  <span class="co"># RGB → BGR for OpenCV/YOLO</span></span></code></pre></div>
+<p><strong>Image format conversion</strong>: - <code>PIL.Image</code>
+stores pixels as RGB numpy-compatible arrays - OpenCV expects BGR (blue
+first) - We convert explicitly to avoid color problems</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>    h, w <span class="op">=</span> original_bgr.shape[:<span class="dv">2</span>]</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    final_mask <span class="op">=</span> np.zeros((h, w), dtype<span class="op">=</span>np.uint8)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    draw_img_bgr <span class="op">=</span> original_bgr.copy()</span></code></pre></div>
+<p><strong>Initialize output structures</strong>: -
+<code>final_mask</code>: An empty (all zeros) mask the same size as the
+input image. U-Net predictions for each detected polyp will be
+<strong>added</strong> to this mask. - <code>draw_img_bgr</code>: A copy
+of the original image where we’ll draw bounding boxes. We copy so we
+don’t modify the original. - <code>.copy()</code>: Creates a completely
+independent copy (not just a reference)</p>
+<hr />
+<h4 id="stage-1-yolo-detection">Stage 1: YOLO Detection</h4>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>    results <span class="op">=</span> yolo(original_bgr, conf<span class="op">=</span>conf_threshold, iou<span class="op">=</span>iou_threshold, verbose<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<p><strong>Run YOLO inference</strong>: Passes the BGR image to YOLO
+with the user-set thresholds: - <code>conf=conf_threshold</code>: Only
+return detections with confidence ≥ threshold (e.g., 0.25) -
+<code>iou=iou_threshold</code>: NMS IoU threshold (e.g., 0.45). Lower →
+more aggressive NMS (removes more boxes) - <code>verbose=True</code>:
+Print detection info to console/terminal</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>    detections <span class="op">=</span> []</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="kw">in</span> results:</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> box <span class="kw">in</span> r.boxes:</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>            x1, y1, x2, y2 <span class="op">=</span> box.xyxy[<span class="dv">0</span>].cpu().numpy().astype(<span class="bu">int</span>)</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>            conf <span class="op">=</span> box.conf[<span class="dv">0</span>].item()</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>            detections.append((x1, y1, x2, y2, conf))</span></code></pre></div>
+<p><strong>Extract detection results</strong>: - <code>results</code> is
+a list of <code>Results</code> objects (one per image if batching) -
+<code>r.boxes</code> contains all detected bounding boxes -
+<code>box.xyxy[0]</code>: Coordinates in (x1,y1,x2,y2) format (top-left
+and bottom-right corners) - <code>.cpu()</code>: Move tensor from GPU to
+CPU (needed before converting to numpy) - <code>.numpy()</code>: Convert
+PyTorch tensor to NumPy array - <code>.astype(int)</code>: Convert float
+coordinates to integers (pixel coordinates must be whole numbers) -
+<code>box.conf[0].item()</code>: Get the confidence score as a plain
+Python float (<code>.item()</code> extracts scalar from tensor)</p>
+<hr />
+<h4 id="stage-2-u-net-segmentation">Stage 2: U-Net Segmentation</h4>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>    transform <span class="op">=</span> A.Compose([</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>        A.Resize(<span class="dv">256</span>, <span class="dv">256</span>),</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        A.Normalize(mean<span class="op">=</span>(<span class="fl">0.485</span>, <span class="fl">0.456</span>, <span class="fl">0.406</span>), std<span class="op">=</span>(<span class="fl">0.229</span>, <span class="fl">0.224</span>, <span class="fl">0.225</span>)),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        ToTensorV2()</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    ])</span></code></pre></div>
+<p><strong>Preprocessing pipeline for U-Net</strong>: Same transforms
+applied during training MUST be applied during inference. If you
+normalized differently during training, the model’s internal statistics
+won’t match and predictions will be garbage.</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (x1, y1, x2, y2, conf) <span class="kw">in</span> detections:</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>        pad <span class="op">=</span> <span class="dv">15</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>        x1, y1 <span class="op">=</span> <span class="bu">max</span>(<span class="dv">0</span>, x1<span class="op">-</span>pad), <span class="bu">max</span>(<span class="dv">0</span>, y1<span class="op">-</span>pad)</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>        x2, y2 <span class="op">=</span> <span class="bu">min</span>(w, x2<span class="op">+</span>pad), <span class="bu">min</span>(h, y2<span class="op">+</span>pad)</span></code></pre></div>
+<p><strong>Expand detected region with padding</strong>: Adds 15 pixels
+of context around each YOLO bounding box before passing to U-Net. This
+gives U-Net some context around the polyp edges, which often improves
+segmentation quality.</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>        crop_bgr <span class="op">=</span> original_bgr[y1:y2, x1:x2]</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>        crop_rgb <span class="op">=</span> cv2.cvtColor(crop_bgr, cv2.COLOR_BGR2RGB)</span></code></pre></div>
+<p><strong>Crop and convert</strong>: Slice out just the polyp region
+from the full image, then convert to RGB for U-Net (which was trained on
+RGB).</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>        augmented <span class="op">=</span> transform(image<span class="op">=</span>crop_rgb)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>        input_tensor <span class="op">=</span> augmented[<span class="st">&#39;image&#39;</span>].unsqueeze(<span class="dv">0</span>).to(DEVICE)</span></code></pre></div>
+<p><strong>Prepare input tensor</strong>: -
+<code>transform(image=crop_rgb)</code> applies Resize + Normalize +
+ToTensorV2 → returns a dict - <code>augmented['image']</code> extracts
+the tensor: shape <code>(3, 256, 256)</code> -
+<code>.unsqueeze(0)</code>: Adds a batch dimension → shape
+<code>(1, 3, 256, 256)</code>. U-Net expects batches even for single
+images. - <code>.to(DEVICE)</code>: Move to GPU/CPU to match the
+model</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>            logits <span class="op">=</span> unet(input_tensor)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>            pred <span class="op">=</span> torch.sigmoid(logits) <span class="op">&gt;</span> <span class="fl">0.5</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>            pred_np <span class="op">=</span> pred[<span class="dv">0</span>, <span class="dv">0</span>].cpu().numpy().astype(np.uint8)</span></code></pre></div>
+<p><strong>Run U-Net inference</strong>: - <code>torch.no_grad()</code>:
+Disables gradient computation (we’re not training, so we don’t need
+gradients). Saves significant memory and computation. -
+<code>logits = unet(input_tensor)</code>: Forward pass. Output shape:
+<code>(1, 1, 256, 256)</code> - <code>torch.sigmoid(logits)</code>:
+Convert raw logits to probabilities (0–1) - <code>&gt; 0.5</code>:
+Binarize: True (1) if probability &gt; 0.5, else False (0) -
+<code>pred[0, 0]</code>: Extract the single mask from the batch and
+single channel: shape <code>(256, 256)</code> -
+<code>.cpu().numpy().astype(np.uint8)</code>: Move to CPU, convert to
+NumPy, cast to 8-bit unsigned int (0 or 1)</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>        crop_h, crop_w <span class="op">=</span> crop_bgr.shape[:<span class="dv">2</span>]</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>        pred_resized <span class="op">=</span> cv2.resize(pred_np, (crop_w, crop_h), interpolation<span class="op">=</span>cv2.INTER_NEAREST)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>        final_mask[y1:y2, x1:x2] <span class="op">=</span> cv2.bitwise_or(final_mask[y1:y2, x1:x2], pred_resized)</span></code></pre></div>
+<p><strong>Resize and place mask back</strong>: - The U-Net output is
+256×256, but the original cropped region might be different sizes -
+Resize back to the original crop dimensions using nearest-neighbor (no
+blending) - Place into the correct position in <code>final_mask</code>
+using <code>bitwise_or</code> (merges multiple polyp masks if
+detected)</p>
+<hr />
+<h4 id="drawing-visualizations">Drawing Visualizations</h4>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>        cv2.rectangle(draw_img_bgr, (x1, y1), (x2, y2), (<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">255</span>), <span class="dv">3</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>        cv2.putText(draw_img_bgr, <span class="ss">f&quot;Polyp: </span><span class="sc">{</span>conf<span class="sc">:.2f}</span><span class="ss">&quot;</span>, (x1, y1<span class="op">-</span><span class="dv">10</span>),</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                    cv2.FONT_HERSHEY_SIMPLEX, <span class="fl">0.6</span>, (<span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">255</span>), <span class="dv">2</span>)</span></code></pre></div>
+<p><strong>Draw bounding box and label</strong>: -
+<code>cv2.rectangle(...)</code>: Draws a rectangle from (x1,y1) to
+(x2,y2) in red <code>(0, 0, 255)</code> (BGR!) with thickness 3px -
+<code>cv2.putText(...)</code>: Writes text like “Polyp: 0.87” above the
+box - <code>(x1, y1-10)</code>: Position = 10 pixels above the box
+top-left - <code>cv2.FONT_HERSHEY_SIMPLEX</code>: Standard OpenCV font -
+<code>0.6</code>: Font scale (relative size) - <code>(0, 0, 255)</code>:
+Red color (BGR) - <code>2</code>: Thickness of the text strokes</p>
+<hr />
+<h4 id="creating-the-final-overlay">Creating the Final Overlay</h4>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>    result_rgb <span class="op">=</span> cv2.cvtColor(draw_img_bgr, cv2.COLOR_BGR2RGB)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>    colored_mask <span class="op">=</span> np.zeros_like(result_rgb)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>    colored_mask[:, :, <span class="dv">1</span>] <span class="op">=</span> <span class="dv">255</span>  <span class="co"># Green channel = 255, others = 0</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>    mask_indices <span class="op">=</span> final_mask <span class="op">==</span> <span class="dv">1</span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>    result_rgb[mask_indices] <span class="op">=</span> cv2.addWeighted(</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        result_rgb[mask_indices], <span class="fl">0.7</span>, colored_mask[mask_indices], <span class="fl">0.3</span>, <span class="dv">0</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
+<p><strong>Alpha blending with green mask</strong>: - Convert back to
+RGB for display in Streamlit - <code>np.zeros_like(result_rgb)</code>:
+Solid black array same size as result image -
+<code>colored_mask[:, :, 1] = 255</code>: Set green channel to max →
+pure green <code>(R=0, G=255, B=0)</code> -
+<code>final_mask == 1</code>: Boolean mask (True only where we detected
+polyp) - <code>cv2.addWeighted(src1, alpha, src2, beta, gamma)</code>:
+Blends two images: - <code>result_rgb[mask_indices]</code> × 0.7 +
+<code>colored_mask[mask_indices]</code> × 0.3 + 0 - Result: 70% original
+image + 30% green = a semi-transparent green overlay</p>
+<hr />
+<h3 id="section-5-the-streamlit-ui">Section 5: The Streamlit UI</h3>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>st.title(<span class="st">&quot;🩺 AI-Powered Polyp Detection &amp; Segmentation&quot;</span>)</span></code></pre></div>
+<p>Renders a large H1 heading in the app.</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>conf_thresh <span class="op">=</span> st.sidebar.slider(<span class="st">&quot;Confidence Threshold&quot;</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>, <span class="fl">0.25</span>, <span class="fl">0.05</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>iou_thresh <span class="op">=</span> st.sidebar.slider(<span class="st">&quot;NMS IoU Threshold&quot;</span>, <span class="fl">0.0</span>, <span class="fl">1.0</span>, <span class="fl">0.45</span>, <span class="fl">0.05</span>)</span></code></pre></div>
+<p><strong>Interactive sliders in the sidebar</strong>: - Arguments:
+<code>label, min, max, default_value, step</code> - User can drag
+sliders to adjust thresholds without restarting the app - The current
+slider value is returned and stored in the variable</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>uploaded_file <span class="op">=</span> st.file_uploader(<span class="st">&quot;📂 Choose an image...&quot;</span>, <span class="bu">type</span><span class="op">=</span>[<span class="st">&quot;jpg&quot;</span>, <span class="st">&quot;png&quot;</span>, <span class="st">&quot;jpeg&quot;</span>])</span></code></pre></div>
+<p><strong>File upload widget</strong>: Creates a file upload
+button/drop area. <code>type=["jpg", "png", "jpeg"]</code> restricts to
+image files only. If a file is uploaded, <code>uploaded_file</code>
+contains the file data; otherwise it’s <code>None</code>.</p>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> uploaded_file <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    image <span class="op">=</span> Image.<span class="bu">open</span>(uploaded_file)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    col1, col2 <span class="op">=</span> st.columns(<span class="dv">2</span>)</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> col1:</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>        st.subheader(<span class="st">&quot;Original Image&quot;</span>)</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>        st.image(image, use_container_width<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<p><strong>Two-column layout</strong>: <code>st.columns(2)</code>
+returns two column objects. Using <code>with col1:</code> makes content
+render in the left column. This is how Streamlit creates side-by-side
+displays.</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> st.button(<span class="st">&quot;🚀 Run Analysis&quot;</span>):</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">with</span> st.spinner(<span class="st">&quot;Analyzing...&quot;</span>):</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>            result_img, status <span class="op">=</span> process_image(image, conf_thresh, iou_thresh)</span></code></pre></div>
+<p><strong>Button + spinner</strong>: <code>st.button()</code> returns
+<code>True</code> when clicked. <code>st.spinner("...")</code> shows a
+loading animation while the indented code runs (blocks UI until
+<code>process_image</code> returns).</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="st">&quot;No&quot;</span> <span class="kw">in</span> status:</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>            st.warning(status)  <span class="co"># Yellow warning box</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>            st.success(status)  <span class="co"># Green success box</span></span></code></pre></div>
+<p><strong>Status feedback</strong>: Streamlit provides styled
+notification boxes: - <code>st.warning()</code>: Yellow box for
+cautionary messages - <code>st.success()</code>: Green box for success
+messages - <code>st.error()</code>: Red box for errors</p>
+<hr />
+<h2 id="the-complete-inference-flow-summary">5.4 The Complete Inference
+Flow Summary</h2>
+<pre><code>User uploads image (JPEG/PNG)
+         │
+         ▼
+PIL.Image.open()
+         │            Convert PIL→NumPy→BGR
+         ▼
+    original_bgr
+         │
+         ▼
+  YOLO(original_bgr)    ← YOLO detects polyps at full resolution (480×640 etc.)
+         │
+         ▼
+  Bounding box list [(x1,y1,x2,y2,conf), ...]
+         │
+    For each box:
+         │
+         ▼
+  Crop + Pad region from original image
+         │
+         ▼
+  Convert BGR→RGB
+         │
+         ▼
+  Resize to 256×256 + Normalize + ToTensor
+         │
+         ▼
+  unet(input_tensor) → logits
+         │
+         ▼
+  sigmoid(logits) &gt; 0.5 → binary mask (256×256)
+         │
+         ▼
+  Resize mask back to crop size
+         │
+         ▼
+  Paste into final_mask at (y1:y2, x1:x2)
+         │
+    After all boxes:
+         ▼
+  Draw boxes on image
+  Apply green overlay where final_mask == 1
+         │
+         ▼
+  Display in Streamlit UI</code></pre>
+<hr />
+<h2 id="key-design-decisions-in-the-app">5.5 Key Design Decisions in the
+App</h2>
+<ol type="1">
+<li><p><strong>Why use <code>best.pt</code> for YOLO (not
+<code>last.pt</code>)?</strong> <code>best.pt</code> is the checkpoint
+with the highest validation mAP — it’s the optimal model, not just the
+most recent.</p></li>
+<li><p><strong>Why use <code>smp.Unet</code> with ResNet34 encoder in
+the app?</strong> The training also used <code>smp.Unet</code>. The
+<code>state_dict</code> (saved weights) can only be loaded into an
+identical architecture. Mismatching architectures cause errors.</p></li>
+<li><p><strong>Why <code>map_location=DEVICE</code> when
+loading?</strong> Weights saved on GPU are stored with GPU memory
+pointers. <code>map_location=DEVICE</code> remaps these to whatever
+hardware is available at inference time.</p></li>
+<li><p><strong>Why is padding added around YOLO boxes before
+U-Net?</strong> U-Net performs better when it can see some tissue
+context around the polyp boundary. The 15px padding provides this
+context.</p></li>
+<li><p><strong>Why <code>torch.no_grad()</code> during
+inference?</strong> During training, PyTorch builds a computational
+graph to compute gradients. During inference, we don’t need gradients.
+<code>no_grad()</code> skips building this graph, reducing memory usage
+by ~50% and speeding up inference.</p></li>
+</ol>
+</body>
+</html>

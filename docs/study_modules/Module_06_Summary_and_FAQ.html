@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Module_06_Summary_and_FAQ</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="module-6-summary-key-concepts-glossary-study-faq">📘 Module 6:
+Summary, Key Concepts Glossary &amp; Study FAQ</h1>
+<h2 id="quick-reference-and-revision-guide-for-the-detseg-project">Quick
+Reference and Revision Guide for the DetSEG Project</h2>
+<hr />
+<h2 id="full-project-pipeline-at-a-glance">6.1 Full Project Pipeline at
+a Glance</h2>
+<pre><code>╔══════════════════════════════════════════════════════════════════════╗
+║                       DetSEG PROJECT PIPELINE                        ║
+╠══════════════════════════════════════════════════════════════════════╣
+║                                                                      ║
+║  STEP 1: DATA PREPARATION                                            ║
+║  ┌─────────────────────────────────────────────────────────────┐     ║
+║  │  Raw Images + Masks                                          │     ║
+║  │       │                                                      │     ║
+║  │  bbox_generator.py → YOLO .txt labels + bounding_boxes.csv  │     ║
+║  │       │                                                      │     ║
+║  │  data_splitter.py  → 80/10/10 Train/Val/Test split           │     ║
+║  │       │                                                      │     ║
+║  │  unet_data_generator.py → 256×256 cropped image+mask patches │     ║
+║  └─────────────────────────────────────────────────────────────┘     ║
+║                                                                      ║
+║  STEP 2: MODEL TRAINING                                              ║
+║  ┌───────────────────────┐    ┌──────────────────────────────────┐   ║
+║  │ YOLO Training         │    │ U-Net Training                   │   ║
+║  │ train_yolo.py         │    │ (notebook/train script)          │   ║
+║  │ Input: Full images    │    │ Input: 256×256 patches           │   ║
+║  │ Output: best.pt       │    │ Output: unet_best.pth            │   ║
+║  └───────────────────────┘    └──────────────────────────────────┘   ║
+║                                                                      ║
+║  STEP 3: INFERENCE (app.py)                                          ║
+║  ┌─────────────────────────────────────────────────────────────┐     ║
+║  │ User uploads image                                           │     ║
+║  │       → YOLO detects polyps (bounding boxes)                 │     ║
+║  │       → U-Net segments each detected region (pixel mask)     │     ║
+║  │       → Visualization (green overlay + red bounding box)     │     ║
+║  └─────────────────────────────────────────────────────────────┘     ║
+║                                                                      ║
+╚══════════════════════════════════════════════════════════════════════╝</code></pre>
+<hr />
+<h2 id="key-files-and-their-roles">6.2 Key Files and Their Roles</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>File</th>
+<th>Location</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>bbox_generator.py</code></td>
+<td><code>src/data_preparation/</code></td>
+<td>Convert binary masks → YOLO labels (.txt) + CSV</td>
+</tr>
+<tr>
+<td><code>data_splitter.py</code></td>
+<td><code>src/data_preparation/</code></td>
+<td>Split dataset 80/10/10 into train/val/test</td>
+</tr>
+<tr>
+<td><code>unet_data_generator.py</code></td>
+<td><code>src/data_preparation/</code></td>
+<td>Crop+resize polyp patches for U-Net</td>
+</tr>
+<tr>
+<td><code>train_yolo.py</code></td>
+<td><code>src/detection/</code></td>
+<td>Train/resume YOLOv8 on polyp detection</td>
+</tr>
+<tr>
+<td><code>unet_model.py</code></td>
+<td><code>src/segmentation/</code></td>
+<td>Custom U-Net architecture in PyTorch</td>
+</tr>
+<tr>
+<td><code>dataset.py</code></td>
+<td><code>src/segmentation/</code></td>
+<td>PyTorch Dataset class for loading patches</td>
+</tr>
+<tr>
+<td><code>app.py</code></td>
+<td><code>src/</code></td>
+<td>Streamlit web app for end-to-end inference</td>
+</tr>
+<tr>
+<td><code>polyp_dataset.yaml</code></td>
+<td><code>configs/</code></td>
+<td>YOLO dataset configuration (paths + class names)</td>
+</tr>
+<tr>
+<td><code>requirements.txt</code></td>
+<td>Root</td>
+<td>All Python package dependencies</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="glossary-of-key-terms">6.3 Glossary of Key Terms</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bounding Box</strong></td>
+<td>A rectangle (x1,y1,x2,y2) that encloses an object in an image</td>
+</tr>
+<tr>
+<td><strong>Binary Mask</strong></td>
+<td>An image where each pixel is 0 (background) or 255 (object)</td>
+</tr>
+<tr>
+<td><strong>YOLO</strong></td>
+<td>You Only Look Once — fast single-pass object detection model</td>
+</tr>
+<tr>
+<td><strong>U-Net</strong></td>
+<td>Encoder-decoder segmentation network with skip connections</td>
+</tr>
+<tr>
+<td><strong>Encoder</strong></td>
+<td>Network component that compresses image into abstract features</td>
+</tr>
+<tr>
+<td><strong>Decoder</strong></td>
+<td>Network component that reconstructs spatial maps from features</td>
+</tr>
+<tr>
+<td><strong>Skip Connection</strong></td>
+<td>Shortcut linking encoder layers to matching decoder layers</td>
+</tr>
+<tr>
+<td><strong>MaxPooling</strong></td>
+<td>Downsampling by taking the maximum value in each window</td>
+</tr>
+<tr>
+<td><strong>Convolution</strong></td>
+<td>Sliding a filter over an image to detect patterns</td>
+</tr>
+<tr>
+<td><strong>Batch Normalization</strong></td>
+<td>Normalizes layer outputs to stabilize training</td>
+</tr>
+<tr>
+<td><strong>ReLU</strong></td>
+<td>Activation function: f(x) = max(0, x) — introduces
+non-linearity</td>
+</tr>
+<tr>
+<td><strong>Sigmoid</strong></td>
+<td>Maps any number to 0–1 range: f(x) = 1/(1+e^(-x))</td>
+</tr>
+<tr>
+<td><strong>Logits</strong></td>
+<td>Raw unnormalized outputs before applying sigmoid/softmax</td>
+</tr>
+<tr>
+<td><strong>IoU</strong></td>
+<td>Intersection over Union — measures overlap between two
+boxes/masks</td>
+</tr>
+<tr>
+<td><strong>mAP</strong></td>
+<td>Mean Average Precision — main metric for detection models</td>
+</tr>
+<tr>
+<td><strong>Dice Score</strong></td>
+<td>2×TP/(2×TP+FP+FN) — main metric for segmentation models</td>
+</tr>
+<tr>
+<td><strong>Epoch</strong></td>
+<td>One complete pass through all training data</td>
+</tr>
+<tr>
+<td><strong>Batch</strong></td>
+<td>A group of images processed together in one forward pass</td>
+</tr>
+<tr>
+<td><strong>Learning Rate</strong></td>
+<td>How large the model’s parameter update steps are</td>
+</tr>
+<tr>
+<td><strong>Overfitting</strong></td>
+<td>Model memorizes training data, fails to generalize</td>
+</tr>
+<tr>
+<td><strong>Augmentation</strong></td>
+<td>Artificially increasing dataset size with image transformations</td>
+</tr>
+<tr>
+<td><strong>Normalization</strong></td>
+<td>Scaling values to a standard range (e.g., 0–1 or using
+mean/std)</td>
+</tr>
+<tr>
+<td><strong>Inference</strong></td>
+<td>Using a trained model to make predictions on new data</td>
+</tr>
+<tr>
+<td><strong>Checkpoint</strong></td>
+<td>A saved copy of model weights at a particular training step</td>
+</tr>
+<tr>
+<td><strong>Transfer Learning</strong></td>
+<td>Using a model pre-trained on one task for a different task</td>
+</tr>
+<tr>
+<td><strong>NMS</strong></td>
+<td>Non-Maximum Suppression — removes duplicate bounding boxes</td>
+</tr>
+<tr>
+<td><strong>Confidence Score</strong></td>
+<td>0–1 probability that a detected object is genuinely present</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="frequently-asked-questions-faq">6.4 Frequently Asked Questions
+(FAQ)</h2>
+<h3 id="q1-why-do-we-need-both-yolo-and-u-net-cant-we-use-just-one">Q1:
+Why do we need both YOLO and U-Net? Can’t we use just one?</h3>
+<p><strong>A</strong>: Each model excels at different tasks: -
+<strong>YOLO alone</strong> gives only a bounding box (rough rectangle).
+No precise boundary. For clinical use, you need exact polyp shape for
+size estimation. - <strong>U-Net alone</strong> on full images is
+computationally expensive and struggles to locate polyps in large images
+with mostly normal tissue. - <strong>Together</strong>: YOLO quickly
+finds the region of interest, U-Net precisely segments within that
+region. Speed + precision.</p>
+<hr />
+<h3
+id="q2-what-is-the-difference-between-best.pt-and-last.pt-in-yolo-training">Q2:
+What is the difference between <code>best.pt</code> and
+<code>last.pt</code> in YOLO training?</h3>
+<p><strong>A</strong>: - <code>last.pt</code>: Saved at the end of every
+epoch. Always the most recent. Used to <strong>resume training</strong>
+if interrupted. - <code>best.pt</code>: Saved only when validation mAP
+reaches a new all-time high. This is the <strong>optimal</strong> model
+for inference (making predictions on new images).</p>
+<hr />
+<h3 id="q3-why-do-we-convert-bgr-to-rgb-and-vice-versa">Q3: Why do we
+convert BGR to RGB and vice versa?</h3>
+<p><strong>A</strong>: OpenCV was developed for Windows APIs that used
+BGR ordering. Most deep learning frameworks and modern code use the
+standard RGB order. Failing to convert causes a subtle but serious bug —
+blue and red channels swap, making a blue polyp look red to the model
+(colors are wrong). Always convert when moving between OpenCV and
+PyTorch/PIL.</p>
+<hr />
+<h3 id="q4-what-does-random.seed42-do-and-why-do-we-use-it">Q4: What
+does <code>random.seed(42)</code> do and why do we use it?</h3>
+<p><strong>A</strong>: Random number generators are actually
+“pseudo-random” — given the same starting number (seed), they produce
+the same sequence every time. Setting <code>seed(42)</code> makes the
+data split <strong>reproducible</strong>: you’ll always get the exact
+same 800/100/100 train/val/test split if you run the script again. This
+is essential for fair comparison between experiments. The number 42 is
+an arbitrary but popular choice (a cultural reference).</p>
+<hr />
+<h3 id="q5-why-use-padding1-in-the-conv2d-layer">Q5: Why use
+<code>padding=1</code> in the Conv2d layer?</h3>
+<p><strong>A</strong>: Without padding, a 3×3 convolution shrinks the
+feature map by 2 pixels in each dimension (it can’t apply the kernel to
+the border pixels). After many such convolutions, the output becomes
+very small. <code>padding=1</code> adds a border of zeros so the output
+size equals the input size — the convolution operates “same” —
+preserving spatial dimensions throughout the encoder.</p>
+<hr />
+<h3 id="q6-what-is-the-bottleneck-layer-in-u-net">Q6: What is the
+bottleneck layer in U-Net?</h3>
+<p><strong>A</strong>: The bottleneck is the smallest, most compressed
+representation of the image — the “deepest” point of the U. For our
+256×256 input: - After 4 MaxPool layers: spatial size = 256 / 2^4 =
+<strong>16×16</strong> pixels - Channel count = <strong>512</strong>
+feature maps</p>
+<p>At this point, each 16×16 “pixel” has 512 features describing a large
+16×16 patch of the original image. The network has learned abstract,
+global understanding of the image. The decoder then “unpacks” this back
+to the full resolution.</p>
+<hr />
+<h3 id="q7-what-happens-during-model.eval-and-why-is-it-needed">Q7: What
+happens during <code>model.eval()</code> and why is it needed?</h3>
+<p><strong>A</strong>: Two common layer types behave differently in
+training vs. inference: - <strong>Batch Normalization</strong>: During
+training, it computes statistics (mean, std) from the current batch.
+During eval, it uses stored <strong>running averages</strong> computed
+during training. - <strong>Dropout</strong> (if used): During training,
+randomly zeros out neurons. During eval, keeps all neurons active.</p>
+<p>Without <code>model.eval()</code>, your inference predictions will
+vary randomly (due to Dropout) and be slightly off (due to BatchNorm
+using wrong statistics). Always call <code>model.eval()</code> before
+inference.</p>
+<hr />
+<h3 id="q8-what-is-torch.no_grad-and-why-use-it">Q8: What is
+<code>torch.no_grad()</code> and why use it?</h3>
+<p><strong>A</strong>: During training, PyTorch tracks every operation
+to build a “computational graph” — this graph is used to compute
+gradients (derivatives) for backpropagation. Building this graph uses
+significant memory. During inference, we don’t need gradients (we’re not
+updating weights). <code>torch.no_grad()</code> disables gradient
+tracking: - Reduces memory usage by ~50% - Speeds up inference -
+Prevents accidental weight updates</p>
+<hr />
+<h3 id="q9-why-normalize-with-mean0.485-0.456-0.406">Q9: Why normalize
+with <code>mean=[0.485, 0.456, 0.406]</code>?</h3>
+<p><strong>A</strong>: These are the <strong>ImageNet dataset
+statistics</strong> (mean pixel values for R, G, B channels across 1.4
+million ImageNet images). When a model is pre-trained on ImageNet, its
+internal filters are calibrated to these input statistics. By
+normalizing our inputs the same way, we ensure our colonoscopy images
+are in the same “space” the model was trained on. The formula is:</p>
+<pre><code>normalized_pixel = (pixel / 255.0 - mean) / std</code></pre>
+<hr />
+<h3 id="q10-what-does-unsqueeze0-do">Q10: What does
+<code>unsqueeze(0)</code> do?</h3>
+<p><strong>A</strong>: Neural networks always process
+<strong>batches</strong> (groups of images), even if you’re feeding just
+one. The model expects input shape
+<code>(batch_size, channels, height, width)</code> =
+<code>(N, C, H, W)</code>. After transforms, a single image tensor is
+<code>(3, 256, 256)</code>. <code>unsqueeze(0)</code> inserts a new
+dimension at position 0, making it <code>(1, 3, 256, 256)</code> — a
+batch of size 1. The reverse operation (removing the batch dim) is
+<code>squeeze(0)</code>.</p>
+<hr />
+<h2 id="common-errors-and-how-to-fix-them">6.5 Common Errors and How to
+Fix Them</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Error</th>
+<th>Cause</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>YOLO model missing</code></td>
+<td><code>best.pt</code> not found at expected path</td>
+<td>Train YOLO first, or check the path in <code>app.py</code></td>
+</tr>
+<tr>
+<td><code>Could not load image</code></td>
+<td>Bad file path or corrupted image</td>
+<td>Check file exists; verify it opens in image viewer</td>
+</tr>
+<tr>
+<td><code>RuntimeError: size mismatch</code></td>
+<td>Loading weights into wrong model architecture</td>
+<td>Ensure <code>smp.Unet(encoder_name="resnet34", ...)</code> matches
+training config</td>
+</tr>
+<tr>
+<td><code>torch.cuda.OutOfMemoryError</code></td>
+<td>Batch size too large for GPU RAM</td>
+<td>Reduce batch size in training script</td>
+</tr>
+<tr>
+<td><code>No contours found</code></td>
+<td>Mask image is all black (no polyp)</td>
+<td>Check mask images; some may be negative/empty samples</td>
+</tr>
+<tr>
+<td><code>KeyError: 'filename'</code></td>
+<td>CSV header mismatch</td>
+<td>Re-run <code>bbox_generator.py</code> to regenerate CSV</td>
+</tr>
+<tr>
+<td><code>Images BGR color mismatch</code></td>
+<td>Forgot to convert BGR↔︎RGB</td>
+<td>Always convert when moving between cv2 and PyTorch</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="performance-results-summary">6.6 Performance Results
+Summary</h2>
+<h3 id="yolo-detection-results-on-kvasir-seg-yolov8s-100-epochs">YOLO
+Detection Results (on Kvasir-SEG, YOLOv8s, 100 epochs)</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mAP@0.5</td>
+<td>~0.88</td>
+</tr>
+<tr>
+<td>mAP@0.5:0.95</td>
+<td>~0.60</td>
+</tr>
+<tr>
+<td>Precision</td>
+<td>~0.86</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td>~0.83</td>
+</tr>
+</tbody>
+</table>
+<h3 id="u-net-segmentation-results-on-kvasir-seg-polyp-patches">U-Net
+Segmentation Results (on Kvasir-SEG polyp patches)</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dice Score</td>
+<td>~0.82</td>
+</tr>
+<tr>
+<td>IoU (Jaccard)</td>
+<td>~0.75</td>
+</tr>
+<tr>
+<td>Pixel Accuracy</td>
+<td>~0.96</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="libraries-and-packages-used">6.7 Libraries and Packages
+Used</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Package</th>
+<th>Version (approx)</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ultralytics</code></td>
+<td>≥8.0</td>
+<td>YOLOv8 training and inference</td>
+</tr>
+<tr>
+<td><code>torch</code></td>
+<td>≥2.0</td>
+<td>Deep learning framework</td>
+</tr>
+<tr>
+<td><code>torchvision</code></td>
+<td>≥0.15</td>
+<td>Vision utilities for PyTorch</td>
+</tr>
+<tr>
+<td><code>segmentation-models-pytorch</code></td>
+<td>≥0.3</td>
+<td>Pre-built segmentation models (smp.Unet)</td>
+</tr>
+<tr>
+<td><code>opencv-python</code></td>
+<td>≥4.8</td>
+<td>Image processing (read/write/transform)</td>
+</tr>
+<tr>
+<td><code>numpy</code></td>
+<td>≥1.24</td>
+<td>Numerical array operations</td>
+</tr>
+<tr>
+<td><code>albumentations</code></td>
+<td>≥1.3</td>
+<td>Image augmentation library</td>
+</tr>
+<tr>
+<td><code>Pillow</code></td>
+<td>≥10.0</td>
+<td>Python image opening (PIL)</td>
+</tr>
+<tr>
+<td><code>streamlit</code></td>
+<td>≥1.30</td>
+<td>Web application framework</td>
+</tr>
+<tr>
+<td><code>gradio</code></td>
+<td>≥4.0</td>
+<td>Alternative demo interface</td>
+</tr>
+<tr>
+<td><code>tqdm</code></td>
+<td>Any</td>
+<td>Progress bars in terminal</td>
+</tr>
+<tr>
+<td><code>scikit-learn</code></td>
+<td>Any</td>
+<td>Train/val split utilities, metrics</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="how-to-run-the-project">6.8 How to Run the Project</h2>
+<h3 id="step-1-install-dependencies">Step 1: Install dependencies</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install <span class="at">-r</span> requirements.txt</span></code></pre></div>
+<h3 id="step-2-prepare-data-run-from-project-root-detseg">Step 2:
+Prepare data (run from project root <code>DetSEG/</code>)</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate YOLO labels from masks</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> src/data_preparation/bbox_generator.py <span class="at">--mask-dir</span> data/raw/masks <span class="at">--label-out-dir</span> data/interim/labels <span class="at">--csv-out-path</span> data/interim/bounding_boxes.csv</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Split dataset</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> src/data_preparation/data_splitter.py <span class="at">--image-dir</span> data/raw/images <span class="at">--mask-dir</span> data/raw/masks <span class="at">--label-dir</span> data/interim/labels <span class="at">--output-dir</span> data/processed</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate U-Net patches</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> src/data_preparation/unet_data_generator.py</span></code></pre></div>
+<h3 id="step-3-train-models">Step 3: Train models</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Train YOLO</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> src/detection/train_yolo.py</span></code></pre></div>
+<h3 id="step-4-launch-the-app">Step 4: Launch the app</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="ex">streamlit</span> run src/app.py</span></code></pre></div>
+<p>Then open your browser to <code>http://localhost:8501</code></p>
+<hr />
+<h2 id="summary-what-makes-detseg-novel">6.9 Summary: What Makes DetSEG
+Novel?</h2>
+<ol type="1">
+<li><p><strong>Two-Stage Pipeline</strong>: Combines the localization
+strength of YOLO with the precise boundary delineation of U-Net — giving
+clinicians both location and shape information.</p></li>
+<li><p><strong>Medical Domain Specialization</strong>: The entire
+pipeline is optimized for colonoscopy images — from data preparation
+(cropping polyp regions) to evaluation metrics (Dice/IoU).</p></li>
+<li><p><strong>End-to-End System</strong>: From raw image upload to
+annotated output in seconds, via an accessible Streamlit web interface
+requiring no technical expertise from clinical users.</p></li>
+<li><p><strong>Reproducible Research</strong>: Fixed random seeds,
+versioned configs, structured directory layout — all choices enable
+reproducible experiments and fair comparison with other
+methods.</p></li>
+</ol>
+</body>
+</html>

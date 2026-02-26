@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Module_01_Project_Overview</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="module-1-project-overview-conceptual-foundation">📘 Module 1:
+Project Overview &amp; Conceptual Foundation</h1>
+<h2 id="detseg-ai-powered-polyp-detection-and-segmentation">DetSEG –
+AI-Powered Polyp Detection and Segmentation</h2>
+<hr />
+<h2 id="what-is-detseg">1.1 What is DetSEG?</h2>
+<p><strong>DetSEG</strong> is an intelligent medical image analysis
+framework designed for the automated <strong>detection</strong> and
+<strong>segmentation</strong> of polyps in colonoscopy images. The name
+“DetSEG” combines <strong>“Detection”</strong> (finding where a polyp
+is) and <strong>“Segmentation”</strong> (outlining the exact shape of a
+polyp pixel by pixel).</p>
+<p>This project solves a real clinical problem: <strong>colorectal
+cancer is one of the most preventable cancers</strong>, and its
+prevention depends almost entirely on finding polyps early during
+colonoscopy. However, studies show that endoscopists miss approximately
+<strong>22–28% of polyps</strong> during routine colonoscopy. An AI
+assistant can reduce this miss rate by highlighting suspicious regions
+in real-time.</p>
+<hr />
+<h2 id="the-core-problem-two-complementary-tasks">1.2 The Core Problem:
+Two Complementary Tasks</h2>
+<p>DetSEG addresses the problem with a <strong>two-stage
+pipeline</strong>:</p>
+<pre><code>Colonoscopy Image
+     │
+     ▼
+┌─────────────────────────────┐
+│  STAGE 1: DETECTION (YOLO)  │  → &quot;Is there a polyp? Where is it?&quot;
+│  Outputs: Bounding Boxes    │    Draws a rectangle around the polyp
+└────────────┬────────────────┘
+             │
+             ▼ (cropped region)
+┌─────────────────────────────┐
+│  STAGE 2: SEGMENTATION      │  → &quot;What is the exact shape of the polyp?&quot;
+│  (U-Net)                    │    Generates a pixel-level mask
+│  Outputs: Binary Mask       │
+└─────────────────────────────┘
+             │
+             ▼
+   Visualization Overlay
+   (bounding box + green mask)</code></pre>
+<h3 id="why-two-stages-instead-of-one">Why Two Stages Instead of
+One?</h3>
+<ul>
+<li><strong>Detection is fast and coarse</strong>: YOLO can tell you
+there is something suspicious and roughly where it is in
+milliseconds.</li>
+<li><strong>Segmentation is precise but slower</strong>: U-Net can
+outline the exact boundary of a polyp, giving clinicians precise size
+and shape information.</li>
+<li>By <strong>combining both</strong>, we get the <strong>speed of
+YOLO</strong> with the <strong>precision of U-Net</strong>.</li>
+</ul>
+<hr />
+<h2 id="key-technologies-used">1.3 Key Technologies Used</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Technology</th>
+<th>Role in Project</th>
+<th>Why Chosen</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>YOLOv8</strong></td>
+<td>Polyp Detection</td>
+<td>State-of-the-art real-time object detector</td>
+</tr>
+<tr>
+<td><strong>U-Net</strong></td>
+<td>Polyp Segmentation</td>
+<td>Designed specifically for biomedical imaging</td>
+</tr>
+<tr>
+<td><strong>PyTorch</strong></td>
+<td>Deep Learning Framework</td>
+<td>Flexible, powerful, industry standard</td>
+</tr>
+<tr>
+<td><strong>OpenCV (cv2)</strong></td>
+<td>Image Processing</td>
+<td>Fast image read/write/transform operations</td>
+</tr>
+<tr>
+<td><strong>Albumentations</strong></td>
+<td>Data Augmentation</td>
+<td>Medical-image-friendly augmentation library</td>
+</tr>
+<tr>
+<td><strong>Streamlit</strong></td>
+<td>Web App UI</td>
+<td>Rapid prototyping of AI demo apps</td>
+</tr>
+<tr>
+<td><strong>Gradio</strong></td>
+<td>Alternative UI</td>
+<td>Quick model demos and sharing</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="project-directory-structure-explained">1.4 Project Directory
+Structure Explained</h2>
+<pre><code>DetSEG/
+│
+├── configs/                        # Configuration files
+│   └── polyp_dataset.yaml          # Tells YOLO where to find data
+│
+├── data/                           # All dataset files (not in Git)
+│   ├── raw/
+│   │   ├── images/                 # Original colonoscopy images
+│   │   └── masks/                  # Ground-truth binary mask images
+│   ├── interim/
+│   │   ├── labels/                 # YOLO-format .txt label files
+│   │   └── bounding_boxes.csv      # Raw pixel bbox coordinates
+│   └── processed/
+│       ├── images/train|val|test/  # Split images for YOLO
+│       ├── labels/train|val|test/  # Matched label files
+│       ├── masks/train|val|test/   # Matched mask files
+│       ├── unet_images/train|val|  # Cropped patches for U-Net
+│       └── unet_masks/train|val/   # Corresponding mask patches
+│
+├── models/                         # Saved model weights
+│   ├── detection/                  # YOLO trained weights
+│   └── segmentation/               # U-Net trained weights
+│
+├── src/                            # All source code
+│   ├── data_preparation/
+│   │   ├── bbox_generator.py       # Mask → YOLO labels + CSV
+│   │   ├── data_splitter.py        # Train/Val/Test split
+│   │   └── unet_data_generator.py  # Crop patches for U-Net
+│   ├── detection/
+│   │   └── train_yolo.py           # YOLO training script
+│   ├── segmentation/
+│   │   ├── unet_model.py           # U-Net architecture
+│   │   └── dataset.py              # PyTorch Dataset class
+│   └── app.py                      # Streamlit web application
+│
+├── requirements.txt                # All Python package dependencies
+└── research_paper.md               # Full research documentation</code></pre>
+<hr />
+<h2 id="dataset-used-kvasir-seg">1.5 Dataset Used: Kvasir-SEG</h2>
+<p>The project uses the <strong>Kvasir-SEG</strong> dataset — a widely
+used open benchmark dataset for polyp segmentation research.</p>
+<ul>
+<li><strong>Source</strong>: Oslo University Hospital, Norway</li>
+<li><strong>Size</strong>: 1,000 images with corresponding ground-truth
+segmentation masks</li>
+<li><strong>Format</strong>: Each image has a corresponding binary mask
+where:
+<ul>
+<li><strong>White pixels (255)</strong> = Polyp region</li>
+<li><strong>Black pixels (0)</strong> = Background / Normal tissue</li>
+</ul></li>
+<li><strong>Image sizes</strong>: Vary from 332×487 to 1920×1072
+pixels</li>
+</ul>
+<h3 id="what-is-a-binary-mask">What Is a Binary Mask?</h3>
+<p>A <strong>binary mask</strong> is a black-and-white image the same
+size as the original colonoscopy image. It acts like a stencil:</p>
+<pre><code>Original Image:     Binary Mask:        What It Means:
+[colonoscopy with   [000000000000        Black = &quot;Not a polyp&quot;
+ a polyp visible]   000111110000        White = &quot;This is a polyp!&quot;
+                    001111111100
+                    000111110000
+                    000000000000]</code></pre>
+<hr />
+<h2 id="the-overall-pipeline-step-by-step">1.6 The Overall Pipeline
+(Step-by-Step)</h2>
+<pre><code>Step 1: Raw Data
+  ├── Colonoscopy images (JPEG/PNG)
+  └── Ground truth segmentation masks
+
+Step 2: Data Preparation
+  ├── bbox_generator.py:   Mask → Bounding Box coordinates + YOLO labels
+  ├── data_splitter.py:    Split 80% Train, 10% Val, 10% Test
+  └── unet_data_generator.py: Crop polyp region + resize to 256×256
+
+Step 3: Model Training
+  ├── train_yolo.py:  Train YOLOv8s on detection task
+  └── train_unet.py:  Train U-Net on segmentation task (patches)
+
+Step 4: Inference / Application
+  └── app.py: Upload image → YOLO detects → U-Net segments → Display
+
+Step 5: Evaluation
+  └── Metrics: mAP (YOLO), Dice Score / IoU (U-Net)</code></pre>
+<hr />
+<h2 id="key-concepts-to-know-before-starting">1.7 Key Concepts to Know
+Before Starting</h2>
+<h3 id="what-is-deep-learning">What is Deep Learning?</h3>
+<p>Deep learning is a branch of machine learning that uses
+<strong>neural networks</strong> with many layers (“deep” = many
+layers). These networks learn patterns from large amounts of data.</p>
+<h3 id="what-is-object-detection">What is Object Detection?</h3>
+<p>Object detection = <strong>Classification + Localization</strong>: 1.
+<em>What</em> is in the image? (Classification: “polyp”) 2.
+<em>Where</em> is it? (Localization: “at position x=100, y=150,
+width=80, height=60”)</p>
+<h3 id="what-is-image-segmentation">What is Image Segmentation?</h3>
+<p>Segmentation goes <strong>beyond</strong> detection — instead of a
+box, it assigns a class label to <strong>every single pixel</strong>.
+This gives us the exact outline of the polyp.</p>
+<h3 id="what-is-a-bounding-box">What is a Bounding Box?</h3>
+<p>A bounding box (bbox) is a rectangle drawn around an object:</p>
+<pre><code>+------------------+
+|                  |
+|   [  Polyp  ]   |   ← This rectangle IS the bounding box
+|                  |
++------------------+
+(x1, y1) = top-left corner
+(x2, y2) = bottom-right corner
+OR represented as: (x_center, y_center, width, height) ← YOLO format</code></pre>
+<h3 id="what-is-normalization">What is Normalization?</h3>
+<p>When neural networks process numbers, they work best when values are
+in a specific small range. <strong>Normalization</strong> rescales pixel
+values: - Original: 0 to 255 (raw pixel values) - Normalized: ~-2.1 to
+~2.6 (using ImageNet statistics)</p>
+<p>Formula:
+<code>normalized = (pixel_value / 255.0 - mean) / std</code></p>
+</body>
+</html>

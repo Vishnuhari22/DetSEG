@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="DetSEG — AI-powered polyp detection and segmentation for colonoscopy. Real-time analysis to catch what matters most.">
+    <title>DetSEG — AI-Powered Polyp Detection & Segmentation</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🩺</text></svg>">
+</head>
+
+<body>
+
+    <!-- ========== NAVIGATION ========== -->
+    <nav class="navbar" id="navbar">
+        <div class="container">
+            <a href="#" class="nav-logo">
+                <div class="logo-icon">🩺</div>
+                <span>DetSEG</span>
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#analysis">Analysis</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#why-us">Why Us</a></li>
+                <li><a href="#faq">FAQ</a></li>
+            </ul>
+            <a href="#analysis" class="nav-cta desktop">Start Analysis</a>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ========== HERO ========== -->
+    <section class="hero" id="hero">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="dot"></span>
+                    AI-Powered Clinical Tool
+                </div>
+                <h1>
+                    Detect polyps<br>
+                    with <span class="gradient-text">precision</span>
+                </h1>
+                <p class="hero-description">
+                    Real-time analysis of colonoscopy videos and images. Our two-stage AI framework catches what matters
+                    most — so you never miss a polyp.
+                </p>
+                <div class="hero-actions">
+                    <a href="#analysis" class="btn-primary">
+                        Analyze
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    <a href="#how-it-works" class="btn-secondary">Learn More</a>
+                </div>
+            </div>
+
+            <div class="hero-visual">
+                <div class="hero-float-stat stat-1 reveal">
+                    <div class="stat-value">95%</div>
+                    <div class="stat-label">Detection Accuracy</div>
+                </div>
+                <div class="hero-float-stat stat-2 reveal">
+                    <div class="stat-value">&lt;100ms</div>
+                    <div class="stat-label">Inference Time</div>
+                </div>
+                <div class="hero-image-wrapper">
+                    <div class="hero-illustration">
+                        <div class="endoscopy-bg"></div>
+                        <div class="polyp-shape"></div>
+                        <div class="detection-box"></div>
+                        <div class="detection-label">Polyp 0.94</div>
+                        <div class="segmentation-overlay"></div>
+                        <div class="scan-lines"></div>
+                        <div class="ui-overlay">
+                            <div class="ui-chip"><span class="status-dot"></span> AI Active</div>
+                            <div class="ui-chip">1 Polyp Detected</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== CAPABILITIES ========== -->
+    <section class="capabilities section" id="features">
+        <div class="container">
+            <div class="section-header reveal">
+                <p class="section-label">Capabilities</p>
+                <h2 class="section-title">Three ways to detect</h2>
+                <p class="section-subtitle">Upload still images for immediate polyp detection analysis, or leverage
+                    real-time video processing during live procedures.</p>
+            </div>
+
+            <div class="capabilities-grid">
+                <div class="capability-card reveal">
+                    <div class="capability-card-image">
+                        <div class="card-illustration img-analysis">
+                            <div class="glow-ring blue"></div>
+                            <div class="card-icon-main icon-blue">🔬</div>
+                        </div>
+                    </div>
+                    <div class="capability-card-body">
+                        <p class="card-type">Images</p>
+                        <h3>Analyze your colonoscopy images</h3>
+                        <p>Process recorded colonoscopy images with our YOLOv8 detection and U-Net segmentation pipeline
+                            for precise polyp identification.</p>
+                        <a href="#analysis" class="card-link" data-tab="image">
+                            Upload Image
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="capability-card reveal">
+                    <div class="capability-card-image">
+                        <div class="card-illustration video-monitor">
+                            <div class="glow-ring purple"></div>
+                            <div class="card-icon-main icon-purple">🎥</div>
+                        </div>
+                    </div>
+                    <div class="capability-card-body">
+                        <p class="card-type">Video</p>
+                        <h3>Monitor live procedural analysis during examination</h3>
+                        <p>Watch the system work in real time during procedures. Every frame is analyzed and flagged
+                            automatically — nothing slips past.</p>
+                        <a href="#analysis" class="card-link" data-tab="video">
+                            Upload Video
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="capability-card reveal">
+                    <div class="capability-card-image">
+                        <div class="card-illustration realtime-detect">
+                            <div class="glow-ring green"></div>
+                            <div class="card-icon-main icon-green">⚡</div>
+                        </div>
+                    </div>
+                    <div class="capability-card-body">
+                        <p class="card-type">Live</p>
+                        <h3>Real-time procedural detection support</h3>
+                        <p>Get instant feedback as colonoscopy procedures unfold. Our AI flags suspicious regions with
+                            bounding boxes and segmentation overlays in real time.</p>
+                        <a href="#analysis" class="card-link" data-tab="image">
+                            Begin
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 12h14M12 5l7 7-7 7" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== ANALYSIS SECTION ========== -->
+    <section class="analysis-section section" id="analysis">
+        <div class="container">
+            <div class="section-header reveal">
+                <p class="section-label">AI Analysis</p>
+                <h2 class="section-title">Upload & Analyze</h2>
+                <p class="section-subtitle">Upload a colonoscopy image or video for instant AI-powered polyp detection
+                    and segmentation.</p>
+            </div>
+
+            <!-- Server Status Banner -->
+            <div class="server-status" id="serverStatus">
+                <span class="status-indicator offline"></span>
+                <span id="serverStatusText">Checking server...</span>
+            </div>
+
+            <!-- Mode Tabs -->
+            <div class="analysis-tabs reveal">
+                <button class="analysis-tab active" data-mode="image">📸 Image Analysis</button>
+                <button class="analysis-tab" data-mode="video">🎬 Video Analysis</button>
+            </div>
+
+            <div class="analysis-workspace reveal">
+                <!-- Left Panel: Upload & Settings -->
+                <div class="analysis-panel-left">
+                    <!-- Upload Area -->
+                    <div class="upload-zone" id="uploadZone">
+                        <div class="upload-icon">📤</div>
+                        <p class="upload-text">Drag & drop or click to upload</p>
+                        <p class="upload-hint" id="uploadHint">Supports JPG, PNG, JPEG</p>
+                        <input type="file" id="fileInput" accept="image/*" hidden>
+                    </div>
+
+                    <!-- File Preview -->
+                    <div class="file-preview" id="filePreview" style="display:none;">
+                        <img id="previewImage" alt="Preview">
+                        <video id="previewVideo" controls style="display:none;"></video>
+                        <button class="remove-file" id="removeFile">✕</button>
+                    </div>
+
+                    <!-- Settings -->
+                    <div class="settings-panel">
+                        <h4>⚙️ Detection Settings</h4>
+                        <div class="slider-group">
+                            <label>
+                                <span>Confidence Threshold</span>
+                                <span class="slider-value" id="confValue">0.25</span>
+                            </label>
+                            <input type="range" id="confSlider" min="0" max="1" step="0.05" value="0.25">
+                            <p class="slider-hint">Lower = more detections (may include false positives)</p>
+                        </div>
+                        <div class="slider-group">
+                            <label>
+                                <span>NMS IoU Threshold</span>
+                                <span class="slider-value" id="iouValue">0.45</span>
+                            </label>
+                            <input type="range" id="iouSlider" min="0" max="1" step="0.05" value="0.45">
+                            <p class="slider-hint">Overlap suppression for overlapping detections</p>
+                        </div>
+                        <div class="slider-group">
+                            <label>
+                                <span>Mask Opacity</span>
+                                <span class="slider-value" id="opacityValue">0.40</span>
+                            </label>
+                            <input type="range" id="opacitySlider" min="0" max="1" step="0.1" value="0.4">
+                            <p class="slider-hint">Segmentation overlay visibility</p>
+                        </div>
+
+                        <!-- Deep Scan Toggle -->
+                        <div class="toggle-group">
+                            <label class="toggle-label">
+                                <span class="toggle-info">
+                                    <span>🔬 Deep Scan</span>
+                                    <span class="toggle-hint">Enhanced detection for small & multiple polyps
+                                        (slower)</span>
+                                </span>
+                                <div class="toggle-switch">
+                                    <input type="checkbox" id="deepScanToggle">
+                                    <span class="toggle-slider"></span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Video-only setting -->
+                        <div class="slider-group video-only" id="skipFramesGroup" style="display:none;">
+                            <label>
+                                <span>Skip Frames</span>
+                                <span class="slider-value" id="skipValue">0</span>
+                            </label>
+                            <input type="range" id="skipSlider" min="0" max="10" step="1" value="0">
+                            <p class="slider-hint">0 = all frames, higher = faster but less smooth</p>
+                        </div>
+
+                        <!-- Voice Alert Settings (Video only) -->
+                        <div class="alert-settings-group video-only" id="alertSettingsGroup" style="display:none;">
+                            <h4>Audio Alerts</h4>
+                            <div class="toggle-group">
+                                <label class="toggle-label">
+                                    <span class="toggle-info">
+                                        <span>Enable Alerts</span>
+                                        <span class="toggle-hint">Play clinical beep on polyp detection</span>
+                                    </span>
+                                    <div class="toggle-switch">
+                                        <input type="checkbox" id="audioAlertToggle" checked>
+                                        <span class="toggle-slider"></span>
+                                    </div>
+                                </label>
+                            </div>
+                            <div class="slider-group">
+                                <label>
+                                    <span>Alert Interval</span>
+                                    <span class="slider-value" id="alertCooldownValue">3s</span>
+                                </label>
+                                <input type="range" id="alertCooldownSlider" min="1" max="10" step="1" value="3">
+                                <p class="slider-hint">Minimum gap between consecutive alerts</p>
+                            </div>
+                            <div class="slider-group">
+                                <label>
+                                    <span>Alert Volume</span>
+                                    <span class="slider-value" id="alertVolumeValue">70%</span>
+                                </label>
+                                <input type="range" id="alertVolumeSlider" min="0" max="100" step="5" value="70">
+                                <p class="slider-hint">Volume of the clinical beep sound</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Analyze Button -->
+                    <button class="btn-analyze" id="analyzeBtn" disabled>
+                        <span class="btn-analyze-text">Run Analysis</span>
+                        <span class="btn-analyze-loading" style="display:none;">
+                            <span class="spinner"></span> Processing...
+                        </span>
+                    </button>
+                </div>
+
+                <!-- Right Panel: Results -->
+                <div class="analysis-panel-right">
+                    <!-- Placeholder -->
+                    <div class="results-placeholder" id="resultsPlaceholder">
+                        <div class="placeholder-icon">🔬</div>
+                        <p>Upload an image or video and click "Analyze" to see results</p>
+                    </div>
+
+                    <!-- Results (hidden until analysis) -->
+                    <div class="results-content" id="resultsContent" style="display:none;">
+                        <!-- Result Tabs -->
+                        <div class="result-tabs">
+                            <button class="result-tab active" data-result="detection">Detection</button>
+                            <button class="result-tab" data-result="segmentation">Segmentation</button>
+                        </div>
+
+                        <!-- Result Images / Video -->
+                        <div class="result-image-container">
+                            <img id="detectionResult" alt="Detection Result" class="result-image active">
+                            <img id="segmentationResult" alt="Segmentation Result" class="result-image"
+                                style="display:none;">
+                            <video id="videoResult" class="result-video" controls style="display:none;"
+                                playsinline></video>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="result-stats" id="resultStats"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== HOW IT WORKS ========== -->
+    <section class="how-it-works section" id="how-it-works">
+        <div class="container">
+            <div class="section-header reveal">
+                <p class="section-label">Simple Process</p>
+                <h2 class="section-title">How it works</h2>
+                <p class="section-subtitle">Three simple steps from upload to actionable results. No complex setup. No
+                    steep learning curve.</p>
+            </div>
+
+            <div class="steps-grid">
+                <div class="step reveal">
+                    <div class="step-number">
+                        <span class="num">1</span>📤
+                    </div>
+                    <h3>Upload</h3>
+                    <p>Upload your colonoscopy image or video through our secure interface. Drag and drop or browse —
+                        it's that simple.</p>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">
+                        <span class="num">2</span>🧠
+                    </div>
+                    <h3>AI Analyzes</h3>
+                    <p>Our two-stage DetSEG framework first detects polyps with YOLOv8, then segments them
+                        pixel-by-pixel with U-Net — all in under 100 milliseconds.</p>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">
+                        <span class="num">3</span>✅
+                    </div>
+                    <h3>Get Results</h3>
+                    <p>Receive clear visual overlays with bounding boxes, segmentation masks, and confidence scores.
+                        Download reports or review findings instantly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== WHY CLINICIANS CHOOSE US ========== -->
+    <section class="why-us section" id="why-us">
+        <div class="container">
+            <div class="section-header reveal">
+                <p class="section-label">Built for Healthcare</p>
+                <h2 class="section-title">Why clinicians choose us</h2>
+                <p class="section-subtitle">Designed from the ground up for real clinical workflows — not an
+                    afterthought.</p>
+            </div>
+            <div class="trust-grid">
+                <div class="trust-card reveal">
+                    <div class="trust-icon">🎯</div>
+                    <h3>Clinical-Grade Accuracy</h3>
+                    <p>Trained on 1,600+ annotated colonoscopy images from benchmark datasets. Our model achieves 95%
+                        mAP@50 detection and 0.89 Dice segmentation accuracy.</p>
+                </div>
+                <div class="trust-card reveal">
+                    <div class="trust-icon">⚡</div>
+                    <h3>Real-Time Speed</h3>
+                    <p>Sub-100ms inference enables live procedural support. Analyze during the examination, not after —
+                        catching polyps the moment they appear on screen.</p>
+                </div>
+                <div class="trust-card reveal">
+                    <div class="trust-icon">🔒</div>
+                    <h3>Privacy First</h3>
+                    <p>All processing happens locally. Your patient data never leaves your environment. No cloud
+                        dependency, no data transmission, complete data sovereignty.</p>
+                </div>
+                <div class="trust-card reveal">
+                    <div class="trust-icon">🧩</div>
+                    <h3>Easy Integration</h3>
+                    <p>Simple web-based interface that works alongside your existing endoscopy system. No hardware
+                        modifications required — just open and start analyzing.</p>
+                </div>
+                <div class="trust-card reveal">
+                    <div class="trust-icon">📊</div>
+                    <h3>Evidence-Based</h3>
+                    <p>Built on peer-reviewed deep learning architectures — YOLOv8 for detection and U-Net with
+                        ResNet-34 encoder for segmentation. Rigorously benchmarked.</p>
+                </div>
+                <div class="trust-card reveal">
+                    <div class="trust-icon">🕐</div>
+                    <h3>Always Available</h3>
+                    <p>AI doesn't fatigue. Whether it's your first procedure of the day or your tenth, DetSEG delivers
+                        consistent performance every single time.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== STATS BAR ========== -->
+    <section class="stats-bar" id="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item reveal">
+                    <div class="stat-number" data-target="95" data-suffix="%">0%</div>
+                    <div class="stat-desc">Detection Accuracy</div>
+                </div>
+                <div class="stat-item reveal">
+                    <div class="stat-number" data-target="100" data-prefix="<" data-suffix="ms">0ms</div>
+                    <div class="stat-desc">Inference Speed</div>
+                </div>
+                <div class="stat-item reveal">
+                    <div class="stat-number" data-target="1600" data-suffix="+">0+</div>
+                    <div class="stat-desc">Training Images</div>
+                </div>
+                <div class="stat-item reveal">
+                    <div class="stat-number" data-target="2" data-suffix=" AI Models">0 AI Models</div>
+                    <div class="stat-desc">Detection + Segmentation</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FAQ ========== -->
+    <section class="faq section" id="faq">
+        <div class="container">
+            <div class="section-header reveal">
+                <p class="section-label">FAQ</p>
+                <h2 class="section-title">Frequently asked questions</h2>
+                <p class="section-subtitle">Everything you need to know about DetSEG and how it fits into your practice.
+                </p>
+            </div>
+            <div class="faq-list reveal">
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What types of images and videos does DetSEG support?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>DetSEG accepts standard colonoscopy images in JPG, PNG, and JPEG formats, as well as video
+                            files in MP4 and AVI formats. The system automatically handles resizing for optimal
+                            processing.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How accurate is the polyp detection?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Our YOLOv8-based detection achieves ~95% mAP@50 on benchmark datasets. The U-Net segmentation
+                            module achieves a mean Dice coefficient of 0.89 and IoU of 0.84 for precise boundary
+                            delineation.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Is my patient data secure?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Absolutely. DetSEG runs entirely on your local infrastructure. No images or data are
+                            transmitted to external servers. All AI inference happens on-premise.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        Can DetSEG replace a trained endoscopist?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>No — and that's by design. DetSEG is a CADe tool intended to assist clinicians as a "second
+                            pair of eyes" to reduce polyp miss rates (6–27%) and improve adenoma detection rates.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        What hardware do I need to run DetSEG?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Any modern computer works. For real-time performance, an NVIDIA GPU (RTX series) is
+                            recommended. CPU-only mode is supported for image-by-image analysis.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question">
+                        How does the two-stage pipeline work?
+                        <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </button>
+                    <div class="faq-answer">
+                        <p>Stage 1 uses YOLOv8 to rapidly scan and localize candidate polyp regions. Stage 2 crops each
+                            detection and feeds it through a U-Net (ResNet-34 encoder) for pixel-level segmentation.
+                            This "detect-then-segment" approach reduces false positives.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== CTA BANNER ========== -->
+    <section class="cta-banner section" id="cta">
+        <div class="container">
+            <div class="cta-inner reveal">
+                <p class="section-label">Get Started</p>
+                <h2 class="section-title">Ready to enhance your practice?</h2>
+                <p class="section-subtitle">Experience AI-powered polyp detection and segmentation. Start analyzing
+                    colonoscopy images in seconds.</p>
+                <div class="cta-actions">
+                    <a href="#analysis" class="btn-primary">
+                        Start Analysis
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                    <a href="#faq" class="btn-secondary">Read FAQ</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="#" class="nav-logo">
+                        <div class="logo-icon">🩺</div>
+                        <span>DetSEG</span>
+                    </a>
+                    <p>AI-powered polyp detection and segmentation for colonoscopy. A two-stage deep learning framework
+                        for clinical decision support.</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#analysis">Analysis</a></li>
+                        <li><a href="#how-it-works">How It Works</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#faq">FAQ</a></li>
+                        <li><a href="#">Documentation</a></li>
+                        <li><a href="#">Research Paper</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Disclaimer</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 DetSEG. All rights reserved. For research and clinical support purposes.</p>
+                <div class="footer-socials">
+                    <a href="#" aria-label="GitHub">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.39.6.11.82-.26.82-.58v-2.03c-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.21.08 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 016.02 0c2.28-1.55 3.29-1.23 3.29-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.21.7.82.58C20.57 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z" />
+                        </svg>
+                    </a>
+                    <a href="#" aria-label="LinkedIn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.47-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 110-4.13 2.06 2.06 0 010 4.13zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z" />
+                        </svg>
+                    </a>
+                    <a href="#" aria-label="Twitter/X">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path
+                                d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

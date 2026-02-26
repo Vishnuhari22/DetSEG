@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Module_03_YOLO_Detection</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="module-3-polyp-detection-with-yolov8">📘 Module 3: Polyp
+Detection with YOLOv8</h1>
+<h2 id="understanding-object-detection-and-how-yolo-works">Understanding
+Object Detection and How YOLO Works</h2>
+<hr />
+<h2 id="what-is-object-detection">3.1 What Is Object Detection?</h2>
+<p><strong>Object detection</strong> is the task of: 1. Finding
+<strong>where</strong> objects are in an image (localization → bounding
+boxes) 2. Identifying <strong>what</strong> each object is
+(classification → class label)</p>
+<p>Unlike simple image classification (which only says “there’s a cat in
+this image”), detection also tells you <strong>where</strong> the cat is
+using a bounding box.</p>
+<p>In our project: “There is a <strong>polyp</strong> at position
+(x=312, y=250, width=90, height=75)”</p>
+<hr />
+<h2 id="what-is-yolo">3.2 What Is YOLO?</h2>
+<p><strong>YOLO</strong> = <strong>Y</strong>ou <strong>O</strong>nly
+<strong>L</strong>ook <strong>O</strong>nce</p>
+<p>Before YOLO, detection was a two-step process: 1. Generate region
+proposals (possible locations) 2. Classify each region</p>
+<p>YOLO revolutionized this by doing <strong>both steps in a single
+forward pass through the neural network</strong> — making it
+dramatically faster (real-time capable).</p>
+<h3 id="how-yolo-works-conceptually">How YOLO Works (Conceptually)</h3>
+<pre><code>Input Image (640×640)
+       │
+       ▼
+┌─────────────────────────────────────────┐
+│  BACKBONE (Feature Extraction)          │
+│  CSPDarknet: Learns edges → shapes      │
+│  → textures → abstract features        │
+└────────────────┬────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────┐
+│  NECK (Feature Pyramid Network)         │
+│  Connects features from different       │
+│  scales so YOLO detects both            │
+│  small and large polyps                 │
+└────────────────┬────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────┐
+│  HEAD (Detection Layer)                 │
+│  For each grid cell, predicts:          │
+│  - Is there an object here?             │
+│  - What class is it?                    │
+│  - What are the exact box coordinates?  │
+└────────────────┬────────────────────────┘
+                 │
+                 ▼
+     Predictions → Non-Maximum Suppression
+                 │
+                 ▼
+     Final Bounding Boxes + Class Labels</code></pre>
+<h3 id="yolov8-variants">YOLOv8 Variants</h3>
+<table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Speed</th>
+<th>Accuracy</th>
+<th>Use Case</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YOLOv8n (nano)</td>
+<td>Fastest ⚡⚡⚡</td>
+<td>Lowest</td>
+<td>Edge devices</td>
+</tr>
+<tr>
+<td><strong>YOLOv8s (small)</strong></td>
+<td>Fast ⚡⚡</td>
+<td>Good</td>
+<td><strong>Our choice</strong></td>
+</tr>
+<tr>
+<td>YOLOv8m (medium)</td>
+<td>Medium</td>
+<td>Better</td>
+<td>Balanced</td>
+</tr>
+<tr>
+<td>YOLOv8l (large)</td>
+<td>Slow</td>
+<td>High</td>
+<td>When accuracy critical</td>
+</tr>
+<tr>
+<td>YOLOv8x (XL)</td>
+<td>Slowest</td>
+<td>Highest</td>
+<td>Research/cloud</td>
+</tr>
+</tbody>
+</table>
+<p>We use <strong>YOLOv8s</strong> — a balance of speed and accuracy
+suitable for medical imaging on limited GPU resources.</p>
+<hr />
+<h2 id="key-concepts-in-yolo-training">3.3 Key Concepts in YOLO
+Training</h2>
+<h3 id="confidence-score">Confidence Score</h3>
+<p>Every predicted box has a <strong>confidence score</strong> (0.0 to
+1.0): - <code>0.9</code> = “I’m 90% sure there’s a polyp here” -
+<code>0.25</code> = “I’m only 25% sure — might be a polyp” - We set a
+<strong>threshold</strong> (e.g., 0.25): boxes below this are
+discarded</p>
+<h3 id="iou-intersection-over-union">IoU — Intersection over Union</h3>
+<p>How do we measure if a predicted box is “good”?</p>
+<pre><code>Predicted Box:     Ground Truth Box:   Overlap:
++--------+         +--------+          +---+
+|        |         |   +---+|          |   |  ← Intersection (shared area)
+|  +---+ |         |   |   ||          +---+
+|  |   | |    +    |   +---+|   =   
+|  +---+ |         |        |      IoU = Intersection Area / Union Area
++--------+         +--------+
+                              If boxes perfectly overlap: IoU = 1.0
+                              If boxes don&#39;t overlap at all: IoU = 0.0</code></pre>
+<p><strong>Good detection</strong>: IoU &gt; 0.5 is typically considered
+a correct detection.</p>
+<h3 id="map-mean-average-precision">mAP — Mean Average Precision</h3>
+<p>The standard metric for object detection: -
+<strong>Precision</strong>: Of all boxes we predicted, how many were
+actually polyps? - <strong>Recall</strong>: Of all actual polyps, how
+many did we find? - <strong>AP (Average Precision)</strong>: Area under
+the Precision-Recall curve (one number summarizing both) -
+<strong>mAP</strong>: Average AP across all classes (we only have 1
+class: polyp)</p>
+<h3 id="non-maximum-suppression-nms">Non-Maximum Suppression (NMS)</h3>
+<p>YOLO often predicts multiple overlapping boxes for the same
+object:</p>
+<pre><code>Without NMS:           With NMS:
++--------+             +--------+
+| +-----+|             |        |
+| |+----+||    →        |        |  ← Only the best box survives
+| |+----+||             |        |
+| +-----+|             +--------+
++--------+</code></pre>
+<p>NMS keeps only the box with the <strong>highest confidence</strong>
+and removes all others that overlap with it significantly. The
+<strong>IoU threshold</strong> for NMS controls how much overlap is
+needed to remove a box.</p>
+<hr />
+<h2 id="the-yolo-dataset-configuration-polyp_dataset.yaml">3.4 The YOLO
+Dataset Configuration: <code>polyp_dataset.yaml</code></h2>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Path to the root directory of the processed dataset</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">path</span><span class="kw">:</span><span class="at"> C:/Users/user/OneDrive/Desktop/DetSEG/data/processed</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Train/val/test image paths (relative to &#39;path&#39; above)</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">train</span><span class="kw">:</span><span class="at"> images/train</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="fu">val</span><span class="kw">:</span><span class="at"> images/val</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">test</span><span class="kw">:</span><span class="at"> images/test</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Class names</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span><span class="kw">:</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">0</span><span class="kw">:</span><span class="at"> polyp</span></span></code></pre></div>
+<h3 id="line-by-line-explanation">Line-by-Line Explanation:</h3>
+<p><strong><code>path: C:/Users/.../data/processed</code></strong> The
+absolute path to the root of our dataset. YOLO uses this as the base
+when looking for images.</p>
+<p><strong><code>train: images/train</code></strong> Combined with
+<code>path</code>, this tells YOLO: “Training images are at
+<code>data/processed/images/train/</code>”. YOLO automatically looks for
+labels in the corresponding <code>labels/train/</code> directory.</p>
+<p><strong><code>val: images/val</code></strong> Validation images
+directory. Used after each training epoch to compute mAP and check for
+overfitting.</p>
+<p><strong><code>names: 0: polyp</code></strong> Our dataset has only 1
+class (index 0) called “polyp”. If we had multiple classes, it would
+be:</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span><span class="kw">:</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">0</span><span class="kw">:</span><span class="at"> polyp</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">1</span><span class="kw">:</span><span class="at"> tumor</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">2</span><span class="kw">:</span><span class="at"> bleeding</span></span></code></pre></div>
+<hr />
+<h2 id="training-script-train_yolo.py-line-by-line-explanation">3.5
+Training Script: <code>train_yolo.py</code> — Line-by-Line
+Explanation</h2>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> ultralytics <span class="im">import</span> YOLO</span></code></pre></div>
+<p><strong>Imports</strong>: <code>ultralytics</code> is the official
+YOLOv8 library by Ultralytics. One import gives us access to the entire
+YOLO training, evaluation, and inference pipeline.</p>
+<hr />
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> train_detection_model():</span></code></pre></div>
+<p>A single function that encapsulates the entire training process. Good
+practice: keeps main logic organized.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>    last_weights_path <span class="op">=</span> <span class="st">&#39;models/detection/yolov8s_polyp_gpu_final/weights/last.pt&#39;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    model <span class="op">=</span> YOLO(last_weights_path)</span></code></pre></div>
+<p><strong>Resume from saved weights</strong>: Instead of starting from
+scratch (which would require loading ImageNet pre-trained weights), we
+load <code>last.pt</code> — the checkpoint saved at the end of the last
+training run.</p>
+<ul>
+<li><code>last.pt</code>: The model weights saved at the <strong>last
+completed epoch</strong>. Good for resuming.</li>
+<li><code>best.pt</code>: The weights from the <strong>best
+epoch</strong> (highest validation mAP). Good for inference.</li>
+</ul>
+<p><strong>Why resume training?</strong> Training can take hours. If it
+was interrupted, or if we want to train for more epochs, we just load
+<code>last.pt</code> and continue — no wasted computation.</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>    data_config_path <span class="op">=</span> <span class="st">&#39;configs/polyp_dataset.yaml&#39;</span></span></code></pre></div>
+<p>Points to our dataset configuration file. This single YAML file tells
+YOLO everything about our data.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>    epochs <span class="op">=</span> <span class="dv">100</span>        <span class="co"># Train for 100 complete passes through the training data</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    batch_size <span class="op">=</span> <span class="dv">16</span>     <span class="co"># Process 16 images simultaneously in one forward pass</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    img_size <span class="op">=</span> <span class="dv">640</span>      <span class="co"># Resize all images to 640×640 during training</span></span></code></pre></div>
+<p><strong>Hyperparameters</strong> — these control how training
+happens: - <strong>Epochs</strong>: One epoch = one complete pass
+through ALL training data. 100 epochs means YOLO sees each image 100
+times. - <strong>Batch size</strong>: Larger batch = faster GPU
+utilization but needs more GPU memory. 16 is a good balance. -
+<strong>Image size</strong>: YOLO internally resizes all images to
+640×640. Larger = better detection of small objects but slower
+training.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>    project_name <span class="op">=</span> <span class="st">&#39;models/detection&#39;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    experiment_name <span class="op">=</span> <span class="st">&#39;yolov8s_polyp_gpu_100_epochs&#39;</span></span></code></pre></div>
+<p><strong>Experiment tracking</strong>: YOLO saves all results
+(weights, metrics, plots) to
+<code>models/detection/yolov8s_polyp_gpu_100_epochs/</code>. Using
+descriptive names lets you compare multiple experiments easily.</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>    model.train(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>        data<span class="op">=</span>data_config_path,      <span class="co"># Where is our data?</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        epochs<span class="op">=</span>epochs,              <span class="co"># How many epochs?</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        batch<span class="op">=</span>batch_size,           <span class="co"># Batch size</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        imgsz<span class="op">=</span>img_size,             <span class="co"># Image size</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        project<span class="op">=</span>project_name,       <span class="co"># Where to save results</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        name<span class="op">=</span>experiment_name,       <span class="co"># Subfolder name</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>        exist_ok<span class="op">=</span><span class="va">True</span>               <span class="co"># Don&#39;t error if folder already exists</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    )</span></code></pre></div>
+<p><strong>The Training Call</strong>: <code>model.train()</code>
+handles: - Loading images and labels from disk in batches - Forward pass
+(prediction) - Computing loss (how wrong we were) - Backward pass
+(computing gradients) - Updating model parameters - Running validation
+at end of each epoch - Saving <code>last.pt</code> and
+<code>best.pt</code> checkpoints - Generating training curve plots</p>
+<hr />
+<h2 id="what-yolo-learns-during-training">3.6 What YOLO Learns During
+Training</h2>
+<p>YOLO is trained using multiple loss components simultaneously:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Loss Component</th>
+<th>What It Teaches YOLO</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Box Loss</strong></td>
+<td>Get the bounding box coordinates right</td>
+</tr>
+<tr>
+<td><strong>Classification Loss</strong></td>
+<td>Correctly label the object class (polyp vs. background)</td>
+</tr>
+<tr>
+<td><strong>Objectness Loss</strong> (DFL)</td>
+<td>Confidence scoring — be more confident when right, less when
+wrong</td>
+</tr>
+</tbody>
+</table>
+<p>The total loss decreases over epochs as YOLO improves. A typical
+training curve:</p>
+<pre><code>Loss
+ ▲
+ │ ╲
+ │  ╲
+ │   ╲___
+ │       ╲____
+ │            ╲________
+ │                     ─────────────
+ └──────────────────────────────────── Epochs
+   0   10   20   30   40   50   100</code></pre>
+<hr />
+<h2 id="key-files-produced-after-yolo-training">3.7 Key Files Produced
+After YOLO Training</h2>
+<p>After training completes, inside
+<code>models/detection/yolov8s_polyp_gpu_100_epochs/</code>:</p>
+<pre><code>├── weights/
+│   ├── best.pt      ← Best model (highest val mAP). Use this for inference!
+│   └── last.pt      ← Last epoch model. Use this to resume training.
+│
+├── results.csv      ← Per-epoch metrics (box_loss, cls_loss, mAP50, mAP50-95)
+├── results.png      ← Visual plot of training curves
+├── confusion_matrix.png  ← How often the model got confused
+├── PR_curve.png     ← Precision-Recall curve
+└── val_batch*.jpg   ← Visual validation predictions vs ground truth</code></pre>
+<hr />
+<h2 id="our-results-summary">3.8 Our Results Summary</h2>
+<p>After training on the Kvasir-SEG dataset:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>mAP@50</td>
+<td>~0.88 (88%)</td>
+</tr>
+<tr>
+<td>mAP@50-95</td>
+<td>~0.60</td>
+</tr>
+<tr>
+<td>Precision</td>
+<td>~0.86</td>
+</tr>
+<tr>
+<td>Recall</td>
+<td>~0.83</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interpretation</strong>: At a 50% IoU threshold, our YOLO
+model correctly detected polyps with 88% average precision.</p>
+</body>
+</html>

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Module_04_UNet_Segmentation</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<h1 id="module-4-polyp-segmentation-with-u-net">📘 Module 4: Polyp
+Segmentation with U-Net</h1>
+<h2
+id="understanding-the-u-net-architecture-and-implementation">Understanding
+the U-Net Architecture and Implementation</h2>
+<hr />
+<h2 id="what-is-image-segmentation">4.1 What Is Image Segmentation?</h2>
+<p><strong>Image segmentation</strong> assigns a label to <strong>every
+pixel</strong> in an image.</p>
+<p>In polyp detection: - <strong>Input</strong>: A 256×256 RGB image of
+a polyp region (crop from colonoscopy) - <strong>Output</strong>: A
+256×256 binary mask where each pixel is 0 (not polyp) or 1 (polyp)</p>
+<pre><code>Input Image (256×256 RGB):       Output Mask (256×256 Binary):
++------------------------+        +------------------------+
+|  [mostly dark tissue]  |        |  000000000000000000000 |
+|  [pinkish tissue]      |   →    |  001111111111110000000 |
+|  [lighter patch=polyp] |        |  011111111111111100000 |
+|  [more tissue]         |        |  001111111111110000000 |
++------------------------+        +------------------------+
+                                 0 = Background, 1 = Polyp</code></pre>
+<hr />
+<h2 id="why-u-net-for-medical-image-segmentation">4.2 Why U-Net for
+Medical Image Segmentation?</h2>
+<p><strong>U-Net</strong> was invented specifically for biomedical image
+segmentation in 2015 at the University of Freiburg. It was designed to
+work even with <strong>very limited training data</strong> — a common
+challenge in medical imaging (getting labeled medical images is
+expensive and requires expert doctors).</p>
+<h3 id="key-innovation-skip-connections">Key Innovation: Skip
+Connections</h3>
+<p>U-Net’s main contribution is <strong>skip connections</strong> (also
+called “encoder-decoder skip connections”): - The encoder compresses the
+image (loses spatial detail but gains understanding) - The decoder
+reconstructs the segmentation map - Skip connections pass
+<strong>spatial detail</strong> from encoder layers directly to decoder
+layers</p>
+<p>This allows U-Net to produce <strong>precise, fine-grained
+segmentation masks</strong> even with small datasets.</p>
+<hr />
+<h2 id="u-net-architecture-the-u-shape">4.3 U-Net Architecture: The “U”
+Shape</h2>
+<p>The name “U-Net” comes from its shape — it looks like the letter
+U:</p>
+<pre><code>Input (3×256×256)
+       │
+   ┌───▼───┐
+   │  inc  │─────────────────────────────────────────┐ Skip 1
+   │64ch   │                                          │
+   └───┬───┘                                          │
+   ┌───▼───┐                                          │
+   │ down1 │──────────────────────────────────┐       │ Skip 2
+   │128ch  │                                  │       │
+   └───┬───┘                                  │       │
+   ┌───▼───┐                                  │       │
+   │ down2 │────────────────────────┐         │       │ Skip 3
+   │256ch  │                        │         │       │
+   └───┬───┘                        │         │       │
+   ┌───▼───┐                        │         │       │
+   │ down3 │────────────┐           │         │       │ Skip 4
+   │512ch  │            │           │         │       │
+   └───┬───┘            │           │         │       │
+   ┌───▼───┐            │           │         │       │
+   │ down4 │ (bottle-   │           │         │       │
+   │512ch  │  neck)     │           │         │       │
+   └───┬───┘            │           │         │       │
+       │    ┌───────────▼───┐       │         │       │
+       └───►│    up1/512ch  │       │         │       │
+            └───────┬───────┘       │         │       │
+                    │   ┌───────────▼───┐     │       │
+                    └──►│    up2/256ch  │     │       │
+                        └───────┬───────┘     │       │
+                                │   ┌─────────▼───┐   │
+                                └──►│    up3/128ch │   │
+                                    └───────┬──────┘   │
+                                            │   ┌──────▼──┐
+                                            └──►│  up4/64ch│
+                                                └───┬──────┘
+                                                    │
+                                               ┌────▼────┐
+                                               │  outc   │
+                                               │ 1 class │
+                                               └─────────┘
+                                          Output (1×256×256)</code></pre>
+<hr />
+<h2 id="unet_model.py-line-by-line-explanation">4.4
+<code>unet_model.py</code> — Line-by-Line Explanation</h2>
+<h3 id="imports">Imports</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch                           <span class="co"># PyTorch base library</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn                  <span class="co"># Neural network building blocks</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torchvision.transforms.functional <span class="im">as</span> TF  <span class="co"># For padding operations</span></span></code></pre></div>
+<ul>
+<li><code>torch</code>: The core library, handles tensors
+(multi-dimensional arrays) and automatic differentiation</li>
+<li><code>torch.nn</code>: Contains all neural network layers (Conv2d,
+BatchNorm2d, ReLU, etc.)</li>
+<li><code>TF</code>: We use it for <code>TF.pad()</code> — a precise way
+to add pixels around tensors</li>
+</ul>
+<hr />
+<h3 id="building-block-1-doubleconv">Building Block 1:
+<code>DoubleConv</code></h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> DoubleConv(nn.Module):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;(Convolution =&gt; [BN] =&gt; ReLU) * 2&quot;&quot;&quot;</span></span></code></pre></div>
+<p><strong>Class inheritance</strong>: <code>nn.Module</code> is
+PyTorch’s base class for all neural network components. By inheriting
+from it, our class gets all the machinery needed (parameter tracking,
+<code>forward()</code> method, GPU transfer, etc.).</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_channels, out_channels, mid_channels<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> mid_channels:</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>            mid_channels <span class="op">=</span> out_channels</span></code></pre></div>
+<p><strong>Constructor</strong>: Called when we create a
+<code>DoubleConv(64, 128)</code>. - <code>in_channels=64</code>: The
+layer receives 64 feature maps as input - <code>out_channels=128</code>:
+The layer outputs 128 feature maps - <code>mid_channels</code>: Optional
+intermediate channel count. If not given, defaults to
+<code>out_channels</code>. - <code>super().__init__()</code>: Calls the
+parent class’s constructor (required for PyTorch modules)</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.double_conv <span class="op">=</span> nn.Sequential(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(in_channels, mid_channels, kernel_size<span class="op">=</span><span class="dv">3</span>, padding<span class="op">=</span><span class="dv">1</span>, bias<span class="op">=</span><span class="va">False</span>),</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>            nn.BatchNorm2d(mid_channels),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(inplace<span class="op">=</span><span class="va">True</span>),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            nn.Conv2d(mid_channels, out_channels, kernel_size<span class="op">=</span><span class="dv">3</span>, padding<span class="op">=</span><span class="dv">1</span>, bias<span class="op">=</span><span class="va">False</span>),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            nn.BatchNorm2d(out_channels),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>            nn.ReLU(inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        )</span></code></pre></div>
+<p><strong><code>nn.Sequential</code></strong>: Creates a container
+where layers are applied in order, like a pipeline. Equivalent to
+chaining functions.</p>
+<p><strong><code>nn.Conv2d(in_channels, mid_channels, kernel_size=3, padding=1, bias=False)</code></strong>:
+The most important layer in deep learning. What it does: - Uses a 3×3
+“filter” (kernel) that slides across the image - At each position,
+multiplies 3×3 patch by the 3×3 weights and sums the result - This
+detects specific patterns (edges, textures, shapes) -
+<code>kernel_size=3</code>: 3×3 filter - <code>padding=1</code>: Adds 1
+pixel of zeros around the input so output size = input size (same
+padding) - <code>bias=False</code>: No additive bias term (BatchNorm
+makes bias redundant)</p>
+<pre><code>How a 3×3 Convolution works:
+   Input patch     ×     Kernel      =    One output value
+   [128, 139, 134]     [-1, -1, -1]
+   [135, 145, 130]  ×  [-1,  8, -1]  =  147 (edge detected!)
+   [120, 125, 118]     [-1, -1, -1]</code></pre>
+<p><strong><code>nn.BatchNorm2d(mid_channels)</code></strong> (Batch
+Normalization): - Normalizes the outputs of the convolution across the
+batch - Reduces “internal covariate shift” (prevents training
+instability) - Also acts as a form of regularization (reduces
+overfitting) - Effect: Makes training faster and more stable</p>
+<p><strong><code>nn.ReLU(inplace=True)</code></strong> (Rectified Linear
+Unit): - Activation function: sets all negative values to 0 -
+<code>f(x) = max(0, x)</code> - Why? Without non-linear activation
+functions, stacking many linear layers is equivalent to just one linear
+layer (the whole “deep” part becomes useless) -
+<code>inplace=True</code>: Modifies the tensor directly in memory (saves
+RAM, slight speedup)</p>
+<pre><code>ReLU:
+     Output
+       ↑
+       │    /
+       │   /
+       │  /
+───────┼─/──────────→ Input
+       │    negative → 0</code></pre>
+<hr />
+<h3 id="building-block-2-down-encoder-step">Building Block 2:
+<code>Down</code> (Encoder Step)</h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Down(nn.Module):</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Downscaling block: MaxPool followed by DoubleConv&quot;&quot;&quot;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_channels, out_channels):</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.maxpool_conv <span class="op">=</span> nn.Sequential(</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>            nn.MaxPool2d(<span class="dv">2</span>),</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>            DoubleConv(in_channels, out_channels)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>        )</span></code></pre></div>
+<p><strong><code>nn.MaxPool2d(2)</code></strong>: Shrinks the spatial
+dimensions by half: - Takes a 2×2 window and outputs only the
+<strong>maximum value</strong> - A 256×256 feature map becomes 128×128 -
+This allows the network to “look at” a larger area of the image with
+each subsequent layer</p>
+<pre><code>MaxPool2d(2) example (on one channel):
+Before:                After:
+[3,  7,  1,  4]       [7,  5]
+[8,  2,  5,  0]  →    [9,  6]
+[9,  1,  3,  6]
+[4,  5,  2,  1]
+Takes max of each 2×2 block</code></pre>
+<p>Why MaxPool? It provides <strong>translation invariance</strong> (a
+polyp slightly to the left or right should give the same detection) and
+compresses the representation.</p>
+<hr />
+<h3 id="building-block-3-up-decoder-step-with-skip-connection">Building
+Block 3: <code>Up</code> (Decoder Step with Skip Connection)</h3>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Up(nn.Module):</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Upscaling block: Upsample/ConvTranspose followed by DoubleConv&quot;&quot;&quot;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_channels, out_channels, bilinear<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> bilinear:</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.up <span class="op">=</span> nn.Upsample(scale_factor<span class="op">=</span><span class="dv">2</span>, mode<span class="op">=</span><span class="st">&#39;bilinear&#39;</span>, align_corners<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.conv <span class="op">=</span> DoubleConv(in_channels, out_channels, in_channels <span class="op">//</span> <span class="dv">2</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.up <span class="op">=</span> nn.ConvTranspose2d(in_channels, in_channels <span class="op">//</span> <span class="dv">2</span>, kernel_size<span class="op">=</span><span class="dv">2</span>, stride<span class="op">=</span><span class="dv">2</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.conv <span class="op">=</span> DoubleConv(in_channels, out_channels)</span></code></pre></div>
+<p><strong>Two upsampling methods</strong>: 1. <strong>Bilinear
+upsampling</strong> (<code>mode='bilinear'</code>): Simply interpolates
+(guesses) intermediate pixel values mathematically. Fast, no learned
+parameters. 2. <strong>Transposed Convolution</strong>
+(<code>ConvTranspose2d</code>): Learnable upsampling — the network
+learns how to upsample. More powerful but more parameters.</p>
+<p>We use bilinear (simpler, works well in practice).</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x1, x2):</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>        x1 <span class="op">=</span> <span class="va">self</span>.up(x1)           <span class="co"># Upsample x1 from decoder</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>        diffY <span class="op">=</span> x2.size()[<span class="dv">2</span>] <span class="op">-</span> x1.size()[<span class="dv">2</span>]  <span class="co"># Height difference</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>        diffX <span class="op">=</span> x2.size()[<span class="dv">3</span>] <span class="op">-</span> x1.size()[<span class="dv">3</span>]  <span class="co"># Width difference</span></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>        x1 <span class="op">=</span> TF.pad(x1, [diffX <span class="op">//</span> <span class="dv">2</span>, diffX <span class="op">-</span> diffX <span class="op">//</span> <span class="dv">2</span>,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                         diffY <span class="op">//</span> <span class="dv">2</span>, diffY <span class="op">-</span> diffY <span class="op">//</span> <span class="dv">2</span>])</span></code></pre></div>
+<p><strong>Why padding is needed</strong>: After upsampling, the decoder
+feature map might be 1 pixel smaller than the encoder feature map (due
+to odd-sized inputs). We pad <code>x1</code> to match <code>x2</code>’s
+size <strong>exactly</strong> before concatenating.</p>
+<p><code>x2.size()[2]</code> = height dimension of x2 (encoder feature
+map) <code>x1.size()[2]</code> = height dimension of x1 (decoder feature
+map)</p>
+<p>The padding <code>[left, right, top, bottom]</code> adds zeros on
+each side to fix the size mismatch.</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> torch.cat([x2, x1], dim<span class="op">=</span><span class="dv">1</span>)  <span class="co"># Concatenate along channel dimension</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.conv(x)</span></code></pre></div>
+<p><strong><code>torch.cat</code></strong>: This IS the skip connection!
+It concatenates: - <code>x2</code>: Feature maps from the matching
+encoder level (contains fine spatial details) - <code>x1</code>: Feature
+maps from the decoder (contains high-level context) -
+<code>dim=1</code>: The channel dimension</p>
+<p>Result: Channel count doubles (64+64=128). DoubleConv then compresses
+this back.</p>
+<p><strong>WHY? The key insight</strong>: Encoder knows “what” is in the
+image (semantic understanding). The fine spatial details (exact pixel
+locations of boundaries) were lost during MaxPooling. The skip
+connection <strong>restores</strong> that detail for precise boundary
+segmentation.</p>
+<hr />
+<h3 id="building-block-4-outconv-final-layer">Building Block 4:
+<code>OutConv</code> (Final Layer)</h3>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> OutConv(nn.Module):</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;Final output convolution layer (1x1)&quot;&quot;&quot;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, in_channels, out_channels):</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(OutConv, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.conv <span class="op">=</span> nn.Conv2d(in_channels, out_channels, kernel_size<span class="op">=</span><span class="dv">1</span>)</span></code></pre></div>
+<p><strong>1×1 Convolution</strong>: A convolution with kernel_size=1
+doesn’t look at neighboring pixels — it simply mixes channels together.
+It’s used here to convert from 64 feature channels to 1 output channel
+(the segmentation map). No spatial information is changed, only channel
+count.</p>
+<hr />
+<h3 id="the-main-unet-class">The Main UNet Class</h3>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> UNet(nn.Module):</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, n_channels, n_classes, bilinear<span class="op">=</span><span class="va">True</span>):</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>(UNet, <span class="va">self</span>).<span class="fu">__init__</span>()</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_channels <span class="op">=</span> n_channels  <span class="co"># 3 (RGB)</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.n_classes <span class="op">=</span> n_classes    <span class="co"># 1 (binary: polyp or not)</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.bilinear <span class="op">=</span> bilinear</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Encoder</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.inc <span class="op">=</span> DoubleConv(n_channels, <span class="dv">64</span>)     <span class="co"># 3→64 channels</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.down1 <span class="op">=</span> Down(<span class="dv">64</span>, <span class="dv">128</span>)                <span class="co"># 64→128 channels, /2 spatial</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.down2 <span class="op">=</span> Down(<span class="dv">128</span>, <span class="dv">256</span>)               <span class="co"># 128→256 channels, /2 spatial</span></span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.down3 <span class="op">=</span> Down(<span class="dv">256</span>, <span class="dv">512</span>)               <span class="co"># 256→512 channels, /2 spatial</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        factor <span class="op">=</span> <span class="dv">2</span> <span class="cf">if</span> bilinear <span class="cf">else</span> <span class="dv">1</span></span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.down4 <span class="op">=</span> Down(<span class="dv">512</span>, <span class="dv">1024</span> <span class="op">//</span> factor)    <span class="co"># 512→512 channels, /2 spatial</span></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Decoder</span></span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.up1 <span class="op">=</span> Up(<span class="dv">1024</span>, <span class="dv">512</span> <span class="op">//</span> factor, bilinear)  <span class="co"># Upsample + concat → 512ch</span></span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.up2 <span class="op">=</span> Up(<span class="dv">512</span>, <span class="dv">256</span> <span class="op">//</span> factor, bilinear)   <span class="co"># Upsample + concat → 256ch</span></span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.up3 <span class="op">=</span> Up(<span class="dv">256</span>, <span class="dv">128</span> <span class="op">//</span> factor, bilinear)   <span class="co"># Upsample + concat → 128ch</span></span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.up4 <span class="op">=</span> Up(<span class="dv">128</span>, <span class="dv">64</span>, bilinear)              <span class="co"># Upsample + concat → 64ch</span></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Output</span></span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.outc <span class="op">=</span> OutConv(<span class="dv">64</span>, n_classes)            <span class="co"># 64→1 channel</span></span></code></pre></div>
+<p><strong>The encoder doubles channels while halving spatial
+size</strong>:</p>
+<pre><code>Input:  3 × 256 × 256
+inc:   64 × 256 × 256
+down1: 128 × 128 × 128
+down2: 256 ×  64 ×  64
+down3: 512 ×  32 ×  32
+down4: 512 ×  16 ×  16   ← Bottleneck (smallest, most abstract)</code></pre>
+<p><strong>The decoder halves channels while doubling spatial
+size</strong>:</p>
+<pre><code>down4: 512 × 16 × 16 (skip from down3: 512 × 32 × 32)
+up1:   512 × 32 × 32   ← combines down3 skip + upsampled down4
+up2:   256 × 64 × 64   ← combines down2 skip + upsampled up1
+up3:   128 × 128 × 128 ← combines down1 skip + upsampled up2
+up4:    64 × 256 × 256 ← combines inc skip + upsampled up3
+outc:    1 × 256 × 256 ← Final segmentation map (same size as input!)</code></pre>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Encoder</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>        x1 <span class="op">=</span> <span class="va">self</span>.inc(x)     <span class="co"># Save for skip connection</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        x2 <span class="op">=</span> <span class="va">self</span>.down1(x1)  <span class="co"># Save for skip connection</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        x3 <span class="op">=</span> <span class="va">self</span>.down2(x2)  <span class="co"># Save for skip connection</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>        x4 <span class="op">=</span> <span class="va">self</span>.down3(x3)  <span class="co"># Save for skip connection</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>        x5 <span class="op">=</span> <span class="va">self</span>.down4(x4)  <span class="co"># Bottleneck</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Decoder + Skip Connections</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.up1(x5, x4)  <span class="co"># x5 is decoder; x4 is skip</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.up2(x, x3)   <span class="co"># x3 is skip from level 3</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.up3(x, x2)   <span class="co"># x2 is skip from level 2</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.up4(x, x1)   <span class="co"># x1 is skip from level 1</span></span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Output</span></span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>        logits <span class="op">=</span> <span class="va">self</span>.outc(x)  <span class="co"># Raw scores (not yet probabilities)</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> logits</span></code></pre></div>
+<p><strong>Why “logits” not “probabilities”?</strong> The final layer
+outputs raw unnormalized scores (can be any real number). We apply
+<code>sigmoid</code> AFTER to get probabilities (0–1). This separation
+is for numerical stability when computing the loss function.</p>
+<p><strong>Sigmoid</strong>: <code>sigmoid(x) = 1 / (1 + e^(-x))</code>
+- Input: any real number (-∞ to +∞) - Output: 0 to 1 (a probability) -
+<code>sigmoid(0) = 0.5</code> (equally uncertain) -
+<code>sigmoid(4) ≈ 0.98</code> (confident it’s a polyp) -
+<code>sigmoid(-4) ≈ 0.02</code> (confident it’s NOT a polyp)</p>
+<hr />
+<h2 id="dataset.py-the-pytorch-dataset-class">4.5
+<code>dataset.py</code> — The PyTorch Dataset Class</h2>
+<h3 id="what-is-a-pytorch-dataset">What Is a PyTorch Dataset?</h3>
+<p>PyTorch has a standard interface for loading data: the
+<code>Dataset</code> class. Any class that inherits from
+<code>torch.utils.data.Dataset</code> must implement: 1.
+<code>__len__()</code>: Returns total number of samples 2.
+<code>__getitem__(index)</code>: Returns one sample (image, mask) pair
+at the given index</p>
+<p>The <code>DataLoader</code> then uses this class to create
+<strong>batches</strong> automatically.</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> PolypDataset(Dataset):</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>, image_dir, mask_dir, transform<span class="op">=</span><span class="va">None</span>):</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.image_dir <span class="op">=</span> image_dir</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.mask_dir <span class="op">=</span> mask_dir</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.transform <span class="op">=</span> transform</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.images <span class="op">=</span> <span class="bu">sorted</span>([f <span class="cf">for</span> f <span class="kw">in</span> os.listdir(image_dir) </span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>                               <span class="cf">if</span> f.lower().endswith((<span class="st">&#39;.png&#39;</span>, <span class="st">&#39;.jpg&#39;</span>, <span class="st">&#39;.jpeg&#39;</span>, <span class="st">&#39;.tif&#39;</span>))])</span></code></pre></div>
+<p><strong>Sorted list</strong>: <code>sorted()</code> ensures files are
+always in alphabetical order, making the dataset deterministic and
+reproducible.</p>
+<p><strong>List comprehension with filter</strong>:
+<code>[f for f in os.listdir(...) if f.lower().endswith(...)]</code>
+reads all files in the directory and keeps only image files.
+<code>.lower()</code> handles <code>IMAGE.PNG</code>,
+<code>image.png</code>, <code>Image.PNG</code> all the same way.</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__getitem__</span>(<span class="va">self</span>, index):</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>        img_filename <span class="op">=</span> <span class="va">self</span>.images[index]</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>        img_path <span class="op">=</span> os.path.join(<span class="va">self</span>.image_dir, img_filename)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>        mask_path <span class="op">=</span> os.path.join(<span class="va">self</span>.mask_dir, img_filename)</span></code></pre></div>
+<p>When PyTorch calls <code>dataset[5]</code>, this method runs with
+<code>index=5</code>. It looks up the filename at position 5 in the
+sorted list and constructs the full paths.</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>        image <span class="op">=</span> cv2.imread(img_path)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>        image <span class="op">=</span> cv2.cvtColor(image, cv2.COLOR_BGR2RGB)</span></code></pre></div>
+<p><strong>BGR to RGB</strong>: OpenCV reads images in
+<strong>BGR</strong> order (Blue, Green, Red) — a legacy from early
+Windows API. But neural networks (and most of the world) expect
+<strong>RGB</strong> (Red, Green, Blue). We must convert, otherwise
+colors are wrong and the model gets confused.</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        _, mask <span class="op">=</span> cv2.threshold(mask, <span class="dv">127</span>, <span class="dv">255</span>, cv2.THRESH_BINARY)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> mask <span class="op">/</span> <span class="fl">255.0</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> np.expand_dims(mask, axis<span class="op">=-</span><span class="dv">1</span>)  <span class="co"># Add channel dimension → (H, W, 1)</span></span></code></pre></div>
+<p><strong>Mask preprocessing steps</strong>: 1.
+<strong>Threshold</strong>: Binarize — any value ≤127 → 0, any value
+≥128 → 255 (strictly 0 or 255) 2. <strong>Normalize</strong>: Divide by
+255.0 → values become 0.0 or 1.0 (matches sigmoid output range) 3.
+<strong>expand_dims</strong>: Add a channel dimension. Shape changes
+from <code>(256, 256)</code> to <code>(256, 256, 1)</code>. Neural
+networks expect a channel dimension even for single-channel data.</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.transform <span class="kw">is</span> <span class="kw">not</span> <span class="va">None</span>:</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>            augmented <span class="op">=</span> <span class="va">self</span>.transform(image<span class="op">=</span>image, mask<span class="op">=</span>mask)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>            image <span class="op">=</span> augmented[<span class="st">&quot;image&quot;</span>]</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>            mask <span class="op">=</span> augmented[<span class="st">&quot;mask&quot;</span>]</span></code></pre></div>
+<p><strong>Albumentations</strong>: The transform pipeline is applied
+<strong>to both image and mask simultaneously</strong>. This is crucial:
+if we flip the image horizontally, we MUST also flip the mask.
+Albumentations handles this automatically via the <code>mask=mask</code>
+argument.</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>        mask <span class="op">=</span> mask.<span class="bu">float</span>()</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> mask.dim() <span class="op">==</span> <span class="dv">3</span> <span class="kw">and</span> mask.shape[<span class="op">-</span><span class="dv">1</span>] <span class="op">==</span> <span class="dv">1</span>:  <span class="co"># HWC format [256, 256, 1]</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>            mask <span class="op">=</span> mask.permute(<span class="dv">2</span>, <span class="dv">0</span>, <span class="dv">1</span>)             <span class="co"># → CHW format [1, 256, 256]</span></span></code></pre></div>
+<p><strong>Dimension reordering</strong>: PyTorch tensors use
+<code>(Channels, Height, Width)</code> order (CHW). NumPy/OpenCV use
+<code>(Height, Width, Channels)</code> order (HWC). We use
+<code>.permute(2, 0, 1)</code> to rearrange: - Dimension 0 (H=256) →
+becomes dimension 1 - Dimension 1 (W=256) → becomes dimension 2<br />
+- Dimension 2 (C=1) → becomes dimension 0</p>
+<hr />
+<h2 id="data-augmentation-with-albumentations">4.6 Data Augmentation
+with Albumentations</h2>
+<p><strong>Augmentation</strong> artificially increases the effective
+size of your training dataset by applying random transformations to
+images. For medical images, common augmentations include:</p>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>train_transform <span class="op">=</span> A.Compose([</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    A.Resize(height<span class="op">=</span><span class="dv">256</span>, width<span class="op">=</span><span class="dv">256</span>),        <span class="co"># Fixed size</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    A.HorizontalFlip(p<span class="op">=</span><span class="fl">0.5</span>),               <span class="co"># 50% chance to flip left-right</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    A.VerticalFlip(p<span class="op">=</span><span class="fl">0.5</span>),                 <span class="co"># 50% chance to flip up-down</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    A.RandomRotate90(p<span class="op">=</span><span class="fl">0.5</span>),               <span class="co"># 50% chance to rotate 90°</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    A.RandomBrightnessContrast(p<span class="op">=</span><span class="fl">0.2</span>),     <span class="co"># 20% chance to adjust brightness</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    A.Normalize(mean<span class="op">=</span>[<span class="fl">0.485</span>, <span class="fl">0.456</span>, <span class="fl">0.406</span>], </span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>                std<span class="op">=</span>[<span class="fl">0.229</span>, <span class="fl">0.224</span>, <span class="fl">0.225</span>]),  <span class="co"># ImageNet normalization</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    ToTensorV2()                            <span class="co"># numpy → PyTorch tensor</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>])</span></code></pre></div>
+<p><strong>Why ImageNet statistics?</strong> Even though we fine-tune on
+colonoscopy images, the U-Net encoder often starts from ImageNet
+pre-trained weights. Using ImageNet normalization statistics ensures
+compatibility.</p>
+<hr />
+<h2 id="loss-function-and-metrics-for-segmentation">4.7 Loss Function
+and Metrics for Segmentation</h2>
+<h3 id="binary-cross-entropy-bce-loss">Binary Cross-Entropy (BCE)
+Loss</h3>
+<p>Used for binary classification at each pixel:</p>
+<pre><code>BCE Loss = -[y * log(p) + (1-y) * log(1-p)]</code></pre>
+<ul>
+<li><code>y</code> = 1 if pixel is polyp, 0 if background</li>
+<li><code>p</code> = model’s predicted probability</li>
+<li>Perfect prediction has BCE = 0</li>
+<li>Completely wrong prediction has BCE → ∞</li>
+</ul>
+<h3 id="dice-loss">Dice Loss</h3>
+<p>Specifically designed for segmentation — directly optimizes the
+overlap metric:</p>
+<pre><code>Dice Coefficient = (2 × |Prediction ∩ Ground Truth|) / (|Prediction| + |Ground Truth|)
+Dice Loss = 1 - Dice Coefficient</code></pre>
+<p>Dice handles <strong>class imbalance</strong> well (polyps are small
+→ mostly background pixels).</p>
+<h3 id="combined-loss-bce-dice">Combined Loss (BCE + Dice)</h3>
+<p>Our model is often trained with:</p>
+<pre><code>Total Loss = BCE Loss + Dice Loss</code></pre>
+<p>This gives the benefits of both: pixel-wise accuracy (BCE) AND shape
+overlap accuracy (Dice).</p>
+<hr />
+<h2 id="evaluation-metrics-for-segmentation">4.8 Evaluation Metrics for
+Segmentation</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Formula</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Dice Score</strong></td>
+<td>2×TP / (2×TP + FP + FN)</td>
+<td>% overlap between prediction and ground truth</td>
+</tr>
+<tr>
+<td><strong>IoU</strong></td>
+<td>TP / (TP + FP + FN)</td>
+<td>Stricter overlap metric</td>
+</tr>
+<tr>
+<td><strong>Precision</strong></td>
+<td>TP / (TP + FP)</td>
+<td>Of all pixels flagged as polyp, how many truly are?</td>
+</tr>
+<tr>
+<td><strong>Recall</strong></td>
+<td>TP / (TP + FN)</td>
+<td>Of all actual polyp pixels, how many did we find?</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Our Results</strong>: - Dice Score: ~0.82 (82% overlap with
+ground truth) - IoU: ~0.75</p>
+</body>
+</html>

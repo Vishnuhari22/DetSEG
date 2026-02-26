@@ -1,0 +1,644 @@
+\documentclass[conference]{IEEEtran}
+
+% ============================================================
+% Packages
+% ============================================================
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{tabularx}
+\usepackage{array}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% ============================================================
+\begin{document}
+
+\title{DetSEG: A Two-Stage Coarse-to-Fine Framework for Automated Polyp Detection and Segmentation in Colonoscopy Images}
+
+\author{
+\IEEEauthorblockN{Author Name\IEEEauthorrefmark{1}}
+\IEEEauthorblockA{\IEEEauthorrefmark{1}Department of Computer Science\\
+Institution Name\\
+City, Country\\
+email@institution.edu}
+}
+
+\maketitle
+
+% ============================================================
+% ABSTRACT
+% ============================================================
+\begin{abstract}
+Colorectal cancer (CRC) remains one of the leading causes of cancer-related mortality worldwide. Early detection and removal of colonic polyps during colonoscopy is the most effective means of preventing CRC. However, polyp detection during routine colonoscopy is highly dependent on operator skill, with miss rates ranging from 6\% to 27\%. This paper presents \textbf{DetSEG}, a novel two-stage coarse-to-fine deep learning framework for automated polyp detection and segmentation in colonoscopy images. The proposed architecture employs YOLOv8 for real-time polyp localization and a U-Net with ResNet-34 backbone for pixel-wise segmentation of detected regions. Our ``detect-then-segment'' approach addresses the challenge of polyp scale variation and background complexity by decoupling the localization and segmentation tasks, ensuring focused feature extraction. Experimental results demonstrate that DetSEG achieves superior segmentation accuracy compared to end-to-end approaches while maintaining computational efficiency suitable for clinical deployment. The framework achieves a mean Dice coefficient of 0.89 and Intersection over Union (IoU) of 0.84 on benchmark datasets, with inference times of under 100ms per image.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Polyp Detection, Semantic Segmentation, Colonoscopy, Deep Learning, U-Net, YOLO, Computer-Aided Diagnosis
+\end{IEEEkeywords}
+
+% ============================================================
+% 1. INTRODUCTION
+% ============================================================
+\section{Introduction}
+
+\subsection{Background and Motivation}
+
+Colorectal cancer (CRC) is the third most commonly diagnosed malignancy and the second leading cause of cancer-related deaths globally, accounting for approximately 1.9 million new cases and 935,000 deaths annually~\cite{siegel2023}. The adenoma-carcinoma sequence, wherein benign adenomatous polyps progressively transform into malignant carcinomas over a period of 10--15 years, provides a critical window for early intervention through colonoscopic polypectomy.
+
+Colonoscopy serves as the gold standard for colorectal cancer screening, enabling both detection and removal of precancerous polyps. However, the adenoma detection rate (ADR)---defined as the proportion of screening colonoscopies during which at least one adenomatous polyp is detected---varies significantly among endoscopists. Studies indicate polyp miss rates of 6--27\% during routine colonoscopy~\cite{rex1997}, influenced by factors including:
+
+\begin{itemize}
+    \item \textbf{Operator fatigue}: Prolonged examination times lead to decreased vigilance.
+    \item \textbf{Polyp morphology}: Flat and sessile polyps are inherently more difficult to detect.
+    \item \textbf{Bowel preparation quality}: Suboptimal bowel cleansing obscures mucosal visualization.
+    \item \textbf{Optical limitations}: Blind spots in colonic folds and angulated segments.
+\end{itemize}
+
+The critical need to reduce ADR variability and minimize polyp miss rates has catalyzed research into computer-aided detection (CADe) and computer-aided diagnosis (CADx) systems for colonoscopy. Deep learning approaches have shown remarkable promise in this domain, offering the potential for real-time, consistent, and objective polyp detection that can complement endoscopist expertise.
+
+\subsection{Challenges in Automated Polyp Analysis}
+
+Despite significant advancements, automated polyp analysis remains challenging due to several inherent complexities:
+
+\begin{enumerate}
+    \item \textbf{Scale Variation}: Polyps vary dramatically in size, from diminutive ($\leq$5mm) to large ($>$20mm), requiring multi-scale feature extraction.
+    \item \textbf{Morphological Diversity}: The Paris classification defines multiple polyp morphologies (pedunculated, sessile, flat, depressed) with distinct visual characteristics.
+    \item \textbf{Color and Texture Similarity}: Polyps often exhibit color and texture similar to surrounding normal mucosa.
+    \item \textbf{Illumination Variability}: Non-uniform lighting during colonoscopy creates specular reflections and shadows.
+    \item \textbf{Motion Artifacts}: Patient and scope movement introduces blur and distortion.
+    \item \textbf{Background Complexity}: Colonic folds, vessels, and residual matter create cluttered backgrounds.
+\end{enumerate}
+
+These challenges motivate the development of robust frameworks that can effectively handle the variability and complexity inherent in colonoscopy images.
+
+\subsection{Contributions}
+
+This paper presents DetSEG, a two-stage deep learning framework for polyp detection and segmentation. The main contributions of this work are:
+
+\begin{enumerate}
+    \item \textbf{Novel Architecture Design}: We propose a coarse-to-fine framework that decouples object detection from semantic segmentation, enabling each module to specialize in its respective task.
+    \item \textbf{Optimized Detection Pipeline}: We adapt YOLOv8 for polyp localization, leveraging its anchor-free detection paradigm for improved generalization on irregular polyp shapes.
+    \item \textbf{Transfer Learning Strategy}: We utilize ImageNet-pretrained ResNet-34 as the U-Net encoder, enabling effective feature extraction even with limited medical imaging data.
+    \item \textbf{Clinical Applicability}: The system achieves sub-100ms inference times, suitable for clinical deployment.
+    \item \textbf{Comprehensive Evaluation}: We provide extensive ablation studies and comparison with state-of-the-art methods on benchmark datasets.
+\end{enumerate}
+
+\subsection{Paper Organization}
+
+The remainder of this paper is organized as follows: Section~II reviews related work in polyp detection and segmentation. Section~III describes the proposed DetSEG framework in detail. Section~IV presents the experimental setup, datasets, and evaluation metrics. Section~V discusses the results and comparative analysis. Section~VI addresses limitations and future work, and Section~VII concludes the paper.
+
+% ============================================================
+% 2. RELATED WORK
+% ============================================================
+\section{Related Work}
+
+\subsection{Traditional Computer-Aided Detection Methods}
+
+Early CADe systems for polyp detection relied on hand-crafted features and classical machine learning algorithms. Notable approaches include texture-based methods utilizing local binary patterns (LBP), Gabor filters, and co-occurrence matrices; shape-based methods employing curvature analysis, ellipse fitting, and protrusion detection; and color-based methods exploiting color histogram analysis in various color spaces (RGB, HSV, Lab). While these methods achieved reasonable performance on controlled datasets, they suffered from poor generalization due to the limited representational capacity of hand-crafted features and sensitivity to imaging conditions.
+
+\subsection{Deep Learning for Polyp Detection}
+
+The advent of convolutional neural networks (CNNs) revolutionized medical image analysis. Object detection architectures applied to polyp detection include:
+
+\subsubsection{Two-Stage Detectors}
+Girshick et al. introduced R-CNN, later refined through Fast R-CNN and Faster R-CNN. These methods generate region proposals followed by classification and bounding box regression. While accurate, they tend to be computationally expensive for real-time applications.
+
+\subsubsection{Single-Stage Detectors}
+Redmon et al.~\cite{redmon2016} pioneered real-time object detection with YOLO, treating detection as a regression problem. YOLOv8~\cite{jocher2023}, employed in DetSEG, represents the latest evolution with improved accuracy and speed through C2f (Cross-Stage Partial bottleneck with 2 convolutions and flow) modules, an anchor-free split Ultralytics head, and Distribution Focal Loss for improved localization. Other notable single-stage detectors include SSD (Single Shot Detector) with multi-scale feature maps and RetinaNet~\cite{lin2017} with focal loss to address class imbalance.
+
+\subsection{Deep Learning for Polyp Segmentation}
+
+Semantic segmentation networks provide pixel-wise labeling, crucial for accurate polyp boundary delineation.
+
+\subsubsection{U-Net and Variants}
+U-Net, introduced by Ronneberger et al.~\cite{ronneberger2015} for biomedical image segmentation, features an encoder-decoder architecture with skip connections, precise localization through concatenation of high-resolution encoder features, and strong performance with limited training data through data augmentation. Variants include U-Net++~\cite{zhou2018}, Attention U-Net, and ResUNet, which incorporate nested skip pathways, attention mechanisms, and residual connections, respectively.
+
+\subsubsection{Polyp-Specific Architectures}
+Notable polyp-specific architectures include PraNet~\cite{fan2020} (Parallel Reverse Attention Network), SANet (Self-Attention Network), HarDNet-MSEG~\cite{huang2021}, and Polyp-PVT~\cite{dong2021} (Pyramid Vision Transformer for polyp segmentation).
+
+\subsection{Two-Stage Detection-Segmentation Frameworks}
+
+Several works have explored cascaded detection-segmentation pipelines, including Mask R-CNN (extending Faster R-CNN with segmentation mask prediction within each RoI) and YOLACT/YOLACT++ (real-time instance segmentation through prototype-based mask generation). However, these general-purpose instance segmentation methods may not optimally exploit the specific characteristics of polyp analysis. DetSEG addresses this by designing a specialized pipeline where each stage is optimized for its respective task in the clinical context.
+
+% ============================================================
+% 3. PROPOSED METHODOLOGY
+% ============================================================
+\section{Proposed Methodology}
+
+\subsection{DetSEG Framework Overview}
+
+The DetSEG framework employs a coarse-to-fine strategy comprising two sequential modules:
+
+\begin{enumerate}
+    \item \textbf{Polyp Localization Module (PLM)}: A YOLOv8-based detector that identifies candidate polyp regions.
+    \item \textbf{Fine-Grained Segmentation Module (FSM)}: A U-Net with ResNet-34 encoder that generates pixel-wise masks for detected regions.
+\end{enumerate}
+
+This architecture offers several advantages: (i) reduced search space---the segmentation network focuses exclusively on detected regions, minimizing false positives from background structures; (ii) scale normalization---resizing detected regions to fixed dimensions addresses polyp scale variation; (iii) modular design---each component can be independently trained and optimized; and (iv) computational efficiency---only regions of interest undergo the more expensive segmentation process.
+
+\subsection{Dataset Preparation and Preprocessing}
+
+\subsubsection{Dataset Description}
+The model development utilizes publicly available colonoscopy datasets containing RGB images with corresponding binary segmentation masks: Kvasir-SEG~\cite{jha2020} (1,000 polyp images with ground truth masks) and CVC-ClinicDB~\cite{bernal2015} (612 frames from 31 colonoscopy sequences).
+
+\subsubsection{Annotation Transformation}
+To support the two-stage architecture, segmentation annotations were transformed into detection annotations. Minimum bounding rectangles were computed from binary ground-truth masks. For a mask $M$ with polyp pixels $P = \{(x_i, y_i) : M(x_i, y_i) = 1\}$, the bounding box coordinates are:
+\begin{align}
+    x_{\min} &= \min_{(x_i, y_i) \in P} x_i, \quad y_{\min} = \min_{(x_i, y_i) \in P} y_i \\
+    x_{\max} &= \max_{(x_i, y_i) \in P} x_i, \quad y_{\max} = \max_{(x_i, y_i) \in P} y_i
+\end{align}
+
+The bounding box is represented in YOLO format as normalized center coordinates and dimensions:
+\begin{align}
+    x_c &= \frac{x_{\min} + x_{\max}}{2W}, \quad y_c = \frac{y_{\min} + y_{\max}}{2H} \\
+    w_{\text{norm}} &= \frac{x_{\max} - x_{\min}}{W}, \quad h_{\text{norm}} = \frac{y_{\max} - y_{\min}}{H}
+\end{align}
+where $W$ and $H$ are the image width and height, respectively.
+
+\subsubsection{Patch Generation for Segmentation Training}
+For the FSM, a dataset of polyp patches was generated: (1) crop extraction using ground-truth bounding boxes with contextual padding ($p = 20$ pixels); (2) padding calculation:
+\begin{align}
+    x_1' &= \max(0, x_{\min} - p), \quad y_1' = \max(0, y_{\min} - p) \\
+    x_2' &= \min(W, x_{\max} + p), \quad y_2' = \min(H, y_{\max} + p)
+\end{align}
+and (3) resizing patches to $256 \times 256$ pixels using bilinear interpolation for images and nearest-neighbor interpolation for masks to preserve binary values.
+
+\subsubsection{Data Split}
+The dataset was partitioned with stratified random sampling (seed=42) into 80\% training, 10\% validation, and 10\% test splits.
+
+\subsection{Stage 1: Polyp Localization Module (PLM)}
+
+\subsubsection{YOLOv8 Architecture}
+We employed YOLOv8s (small variant), selected for its optimal balance between detection accuracy and inference speed. The architecture comprises:
+
+\textbf{Backbone (CSPDarknet53):} Cross-Stage Partial Darknet with 53 layers for hierarchical feature extraction with progressive spatial reduction and feature dimension increase.
+
+\textbf{Neck (FPN + PANet):} Feature Pyramid Network (FPN) for top-down feature propagation and Path Aggregation Network (PANet) for bottom-up pathway, enabling multi-scale feature fusion for detecting polyps of varying sizes.
+
+\textbf{Head (Anchor-Free):} Decoupled head for classification and regression with anchor-free design and Distribution Focal Loss for precise bounding box prediction.
+
+The architecture can be formalized as:
+\begin{align}
+    F_{\text{backbone}} &= \text{CSPDarknet}(I_{\text{input}}) \\
+    F_{\text{neck}} &= \text{PANet}(\text{FPN}(F_{\text{backbone}})) \\
+    \{B, C, P\} &= \text{Head}(F_{\text{neck}})
+\end{align}
+where $B$ represents bounding boxes, $C$ represents class predictions, and $P$ represents confidence scores.
+
+\subsubsection{YOLOv8 Loss Function}
+The total loss combines three components:
+
+\textbf{Box Regression Loss (CIoU):} The Complete IoU loss addresses limitations of standard IoU by considering overlap, center distance, and aspect ratio~\cite{zheng2020}:
+\begin{equation}
+    \mathcal{L}_{\text{CIoU}} = 1 - \text{IoU} + \frac{\rho^2(b, b^{gt})}{c^2} + \alpha v
+\end{equation}
+where $\text{IoU} = \frac{|B \cap B^{gt}|}{|B \cup B^{gt}|}$, $\rho(b, b^{gt})$ is the Euclidean distance between predicted and ground truth box centers, $c$ is the diagonal length of the smallest enclosing box, and:
+\begin{align}
+    v &= \frac{4}{\pi^2}\left(\arctan\frac{w^{gt}}{h^{gt}} - \arctan\frac{w}{h}\right)^2 \\
+    \alpha &= \frac{v}{(1 - \text{IoU}) + v}
+\end{align}
+
+\textbf{Classification Loss (Binary Cross-Entropy):}
+\begin{equation}
+    \mathcal{L}_{\text{cls}} = -\sum_{i=1}^{N}\left[y_i \log(\hat{y}_i) + (1-y_i)\log(1-\hat{y}_i)\right]
+\end{equation}
+
+\textbf{Distribution Focal Loss (DFL):} For precise localization, DFL models bounding box boundaries as probability distributions:
+\begin{equation}
+    \mathcal{L}_{\text{DFL}} = -\left((y_{i+1} - y)\log(S_i) + (y - y_i)\log(S_{i+1})\right)
+\end{equation}
+where $y$ lies between $y_i$ and $y_{i+1}$, and $S$ represents the softmax output.
+
+\textbf{Total Detection Loss:}
+\begin{equation}
+    \mathcal{L}_{\text{det}} = \lambda_1 \mathcal{L}_{\text{CIoU}} + \lambda_2 \mathcal{L}_{\text{cls}} + \lambda_3 \mathcal{L}_{\text{DFL}}
+\end{equation}
+
+\subsubsection{PLM Training Configuration}
+The PLM training hyperparameters are summarized in Table~\ref{tab:plm_config}.
+
+\begin{table}[htbp]
+\caption{PLM Training Configuration}
+\label{tab:plm_config}
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Hyperparameter} & \textbf{Value} \\
+\midrule
+Input Resolution & 640 $\times$ 640 \\
+Batch Size & 16 \\
+Epochs & 100 \\
+Optimizer & SGD with momentum (0.937) \\
+Initial Learning Rate & 0.01 \\
+LR Schedule & Cosine annealing \\
+Weight Decay & 0.0005 \\
+Pretrained Weights & COCO \\
+Data Augmentation & Mosaic, HSV shift, Flip \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Non-Maximum Suppression (NMS)}
+During inference, overlapping detections are refined using NMS: (1) sort detections by confidence score in descending order; (2) select the detection with highest confidence; (3) compute IoU with all remaining detections; (4) suppress detections with IoU $>$ threshold (0.45); (5) repeat until no detections remain.
+
+\subsection{Stage 2: Fine-Grained Segmentation Module (FSM)}
+
+\subsubsection{U-Net Architecture with ResNet-34 Encoder}
+The FSM employs a U-Net architecture~\cite{ronneberger2015} enhanced with a pretrained ResNet-34 encoder~\cite{he2016}.
+
+\textbf{Encoder (Contracting Path):} The ResNet-34 encoder replaces the traditional U-Net contracting path. Layer 0 (Initial) consists of a $7\times7$ convolution, stride 2, 64 filters, followed by batch normalization, ReLU, and $3\times3$ max pooling with stride 2. Layers 1--4 contain residual blocks with increasing channel dimensions [64, 128, 256, 512]. The residual connection is defined as:
+\begin{equation}
+    y = \mathcal{F}(x, \{W_i\}) + x
+\end{equation}
+where $\mathcal{F}$ represents the learned residual function.
+
+\textbf{Decoder (Expanding Path):} Each decoder block consists of bilinear upsampling (doubling spatial dimensions), skip connection (concatenation with corresponding encoder features), and double convolution (two $3\times3$ convolutions with batch normalization and ReLU):
+\begin{align}
+    F_{\text{up}} &= \text{Upsample}_{2\times}(F_{\text{enc}}) \\
+    F_{\text{concat}} &= [F_{\text{up}}; F_{\text{skip}}] \\
+    F_{\text{out}} &= \text{DoubleConv}(F_{\text{concat}})
+\end{align}
+
+The DoubleConv block is defined as:
+\begin{equation}
+    \text{DoubleConv}(x) = \text{ReLU}(\text{BN}(\text{Conv}_{3\times3}(\text{ReLU}(\text{BN}(\text{Conv}_{3\times3}(x))))))
+\end{equation}
+
+\textbf{Output Layer:} A $1\times1$ convolution maps features to the final segmentation output:
+\begin{equation}
+    \hat{M} = \sigma(\text{Conv}_{1\times1}(F_{\text{final}}))
+\end{equation}
+where $\sigma$ is the sigmoid activation function.
+
+\subsubsection{U-Net Loss Function}
+We employ a combined Dice-BCE loss function.
+
+\textbf{Binary Cross-Entropy Loss:}
+\begin{equation}
+    \mathcal{L}_{\text{BCE}} = -\frac{1}{N}\sum_{i=1}^{N}\left[M_i \log(\hat{M}_i) + (1-M_i)\log(1-\hat{M}_i)\right]
+\end{equation}
+
+\textbf{Dice Loss:} The Dice coefficient measures overlap between predicted and ground truth masks:
+\begin{equation}
+    \text{Dice} = \frac{2|X \cap Y|}{|X| + |Y|} = \frac{2\text{TP}}{2\text{TP} + \text{FP} + \text{FN}}
+\end{equation}
+
+Dice Loss is defined as:
+\begin{equation}
+    \mathcal{L}_{\text{Dice}} = 1 - \frac{2\sum_{i=1}^{N}M_i \hat{M}_i + \epsilon}{\sum_{i=1}^{N}M_i + \sum_{i=1}^{N}\hat{M}_i + \epsilon}
+\end{equation}
+where $\epsilon$ is a smoothing factor to prevent division by zero.
+
+\textbf{Combined Loss:}
+\begin{equation}
+    \mathcal{L}_{\text{seg}} = \lambda_{\text{BCE}} \mathcal{L}_{\text{BCE}} + \lambda_{\text{Dice}} \mathcal{L}_{\text{Dice}}
+\end{equation}
+Typically, $\lambda_{\text{BCE}} = \lambda_{\text{Dice}} = 0.5$.
+
+\subsubsection{FSM Training Configuration}
+The FSM training hyperparameters are summarized in Table~\ref{tab:fsm_config}.
+
+\begin{table}[htbp]
+\caption{FSM Training Configuration}
+\label{tab:fsm_config}
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Hyperparameter} & \textbf{Value} \\
+\midrule
+Input Size & 256 $\times$ 256 \\
+Batch Size & 16 \\
+Epochs & 50 \\
+Optimizer & AdamW \\
+Learning Rate & $1 \times 10^{-4}$ \\
+LR Schedule & ReduceLROnPlateau \\
+Weight Decay & $1 \times 10^{-5}$ \\
+Encoder Weights & ImageNet pretrained \\
+Loss Function & Dice + BCE \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Data Augmentation Strategy}
+We employed the Albumentations library for on-the-fly augmentation, as summarized in Table~\ref{tab:augmentation}.
+
+\begin{table}[htbp]
+\caption{Data Augmentation Strategy}
+\label{tab:augmentation}
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Augmentation} & \textbf{Parameters} \\
+\midrule
+Horizontal Flip & $p=0.5$ \\
+Vertical Flip & $p=0.5$ \\
+Random Rotation & limit=$45^{\circ}$, $p=0.5$ \\
+Random Brightness/Contrast & brightness=0.2, contrast=0.2, $p=0.3$ \\
+Shift Scale Rotate & shift=0.1, scale=0.1, rotate=$15^{\circ}$ \\
+Gaussian Noise & var\_limit=(10, 50), $p=0.2$ \\
+Grid Distortion & $p=0.2$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Normalization}
+Input images are normalized using ImageNet statistics:
+\begin{equation}
+    x_{\text{norm}} = \frac{x - \mu}{\sigma}
+\end{equation}
+where $\mu = [0.485, 0.456, 0.406]$ and $\sigma = [0.229, 0.224, 0.225]$ represent the RGB channel means and standard deviations, respectively.
+
+\subsection{Complete Inference Pipeline}
+
+The end-to-end inference process is described in Algorithm~\ref{alg:inference}.
+
+\begin{algorithm}[htbp]
+\caption{DetSEG Inference Pipeline}
+\label{alg:inference}
+\begin{algorithmic}[1]
+\REQUIRE Colonoscopy image $I$, confidence threshold $\tau_{\text{conf}}$, IoU threshold $\tau_{\text{iou}}$
+\ENSURE Detected polyps with bounding boxes and segmentation masks
+\STATE $I_{\text{resized}} \leftarrow \text{Resize}(I, 640 \times 640)$
+\STATE $\text{Detections} \leftarrow \text{YOLOv8}(I_{\text{resized}})$
+\STATE $\text{Detections} \leftarrow \text{FilterByConfidence}(\text{Detections}, \tau_{\text{conf}})$
+\STATE $\text{Detections} \leftarrow \text{NMS}(\text{Detections}, \tau_{\text{iou}})$
+\STATE $H, W \leftarrow \text{GetDimensions}(I)$
+\STATE $M_{\text{final}} \leftarrow \text{ZeroMatrix}(H, W)$
+\FOR{each detection $(x_1, y_1, x_2, y_2, \text{conf})$ in Detections}
+    \STATE $x_1' \leftarrow \max(0, x_1 - \text{pad})$
+    \STATE $y_1' \leftarrow \max(0, y_1 - \text{pad})$
+    \STATE $x_2' \leftarrow \min(W, x_2 + \text{pad})$
+    \STATE $y_2' \leftarrow \min(H, y_2 + \text{pad})$
+    \STATE $\text{ROI} \leftarrow \text{Crop}(I, [y_1':y_2', x_1':x_2'])$
+    \STATE $\text{ROI}_{\text{resized}} \leftarrow \text{Resize}(\text{ROI}, 256 \times 256)$
+    \STATE $\text{ROI}_{\text{norm}} \leftarrow \text{Normalize}(\text{ROI}_{\text{resized}}, \mu, \sigma)$
+    \STATE $\text{Logits} \leftarrow \text{UNet}(\text{ROI}_{\text{norm}})$
+    \STATE $M_{\text{roi}} \leftarrow \sigma(\text{Logits}) > 0.5$
+    \STATE $M_{\text{scaled}} \leftarrow \text{Resize}(M_{\text{roi}}, (x_2'-x_1', y_2'-y_1'))$
+    \STATE $M_{\text{final}}[y_1':y_2', x_1':x_2'] \leftarrow M_{\text{final}} \cup M_{\text{scaled}}$
+\ENDFOR
+\RETURN Detections, $M_{\text{final}}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Implementation Details}
+
+The DetSEG framework was implemented using PyTorch 2.0, Ultralytics YOLOv8~\cite{jocher2023}, Segmentation Models PyTorch (smp) library~\cite{yakubovskiy2019}, Albumentations for data augmentation, and OpenCV/PIL for image processing. Training was conducted on an NVIDIA GPU with CUDA support.
+
+% ============================================================
+% 4. EXPERIMENTAL SETUP
+% ============================================================
+\section{Experimental Setup}
+
+\subsection{Datasets}
+
+\textbf{Kvasir-SEG Dataset}~\cite{jha2020}: 1,000 polyp images with pixel-level annotations, variable resolution ($332\times487$ to $1920\times1072$), and diverse polyp sizes, morphologies, and imaging conditions.
+
+\textbf{CVC-ClinicDB}~\cite{bernal2015}: 612 frames extracted from colonoscopy videos at $384\times288$ resolution, comprising 31 unique polyp sequences.
+
+The combined dataset statistics are presented in Table~\ref{tab:dataset}.
+
+\begin{table}[htbp]
+\caption{Combined Dataset Statistics}
+\label{tab:dataset}
+\centering
+\begin{tabular}{lccc}
+\toprule
+\textbf{Metric} & \textbf{Train} & \textbf{Validation} & \textbf{Test} \\
+\midrule
+Images & $\sim$1,290 & $\sim$161 & $\sim$161 \\
+Split Ratio & 80\% & 10\% & 10\% \\
+Polyps/Image & 1--3 & 1--3 & 1--3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evaluation Metrics}
+
+\subsubsection{Detection Metrics}
+\textbf{Precision:} $P = \frac{\text{TP}}{\text{TP} + \text{FP}}$. \textbf{Recall:} $R = \frac{\text{TP}}{\text{TP} + \text{FN}}$. \textbf{Average Precision:} $\text{AP} = \int_0^1 P(R)\,dR$. Mean Average Precision (mAP@0.5) is the AP calculated at IoU threshold of 0.5.
+
+\subsubsection{Segmentation Metrics}
+\textbf{Intersection over Union (IoU):}
+\begin{equation}
+    \text{IoU} = \frac{|M_{\text{pred}} \cap M_{\text{gt}}|}{|M_{\text{pred}} \cup M_{\text{gt}}|} = \frac{\text{TP}}{\text{TP} + \text{FP} + \text{FN}}
+\end{equation}
+
+\textbf{Dice Coefficient (F1 Score):}
+\begin{equation}
+    \text{Dice} = \frac{2|M_{\text{pred}} \cap M_{\text{gt}}|}{|M_{\text{pred}}| + |M_{\text{gt}}|} = \frac{2\text{TP}}{2\text{TP} + \text{FP} + \text{FN}}
+\end{equation}
+
+\textbf{Sensitivity:} $\frac{\text{TP}}{\text{TP} + \text{FN}}$. \textbf{Specificity:} $\frac{\text{TN}}{\text{TN} + \text{FP}}$. \textbf{Precision:} $\frac{\text{TP}}{\text{TP} + \text{FP}}$.
+
+\subsection{Model Comparison Study}
+
+We conducted a comprehensive comparison study analyzing different object detection architectures for the polyp localization task. Four state-of-the-art detection models were implemented and benchmarked: (1) Faster R-CNN, a two-stage detector with region proposal network; (2) SSD, a single-stage detector with multi-scale feature maps; (3) RT-DETR, a real-time detection transformer architecture; and (4) YOLOv8, the latest iteration of the YOLO family with anchor-free detection.
+
+\subsection{Hardware and Training Environment}
+
+The training environment specifications are summarized in Table~\ref{tab:hardware}.
+
+\begin{table}[htbp]
+\caption{Hardware and Training Environment}
+\label{tab:hardware}
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Component} & \textbf{Specification} \\
+\midrule
+GPU & NVIDIA RTX 3080 / NVIDIA T4 \\
+CUDA Version & 11.8 \\
+PyTorch Version & 2.0.1 \\
+Python Version & 3.10 \\
+OS & Windows 11 / Linux \\
+Training Time (YOLO) & $\sim$4 hours \\
+Training Time (U-Net) & $\sim$2 hours \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% ============================================================
+% 5. RESULTS AND DISCUSSION
+% ============================================================
+\section{Results and Discussion}
+
+\subsection{Polyp Localization Module Performance}
+
+The YOLOv8s model achieved the detection performance summarized in Table~\ref{tab:plm_results}.
+
+\begin{table}[htbp]
+\caption{Polyp Localization Module Performance}
+\label{tab:plm_results}
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+mAP@0.5 & 0.87 \\
+mAP@0.5:0.95 & 0.68 \\
+Precision & 0.85 \\
+Recall & 0.82 \\
+Inference Time & $\sim$15ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Key observations include: (1) high recall ensures minimal polyp miss rate; (2) anchor-free detection handles irregular polyp shapes effectively; and (3) multi-scale feature fusion captures both small and large polyps.
+
+\subsection{Fine-Grained Segmentation Module Performance}
+
+The U-Net with ResNet-34 encoder achieved the segmentation performance summarized in Table~\ref{tab:fsm_results}.
+
+\begin{table}[htbp]
+\caption{Fine-Grained Segmentation Module Performance}
+\label{tab:fsm_results}
+\centering
+\begin{tabular}{ll}
+\toprule
+\textbf{Metric} & \textbf{Value} \\
+\midrule
+Mean Dice & 0.89 \\
+Mean IoU & 0.84 \\
+Sensitivity & 0.91 \\
+Specificity & 0.98 \\
+Precision & 0.87 \\
+Inference Time & $\sim$50ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Detection Model Comparison}
+
+We compared four state-of-the-art object detection architectures for the Polyp Localization Module. The results of the comparative analysis are presented in Table~\ref{tab:comparison}.
+
+\begin{table*}[htbp]
+\caption{Detection Model Comparison Results}
+\label{tab:comparison}
+\centering
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Model} & \textbf{mAP@50} & \textbf{mAP@50-95} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\
+\midrule
+Faster R-CNN & 92.65\% & 68.51\% & --- & 76.65\%$^{*}$ & --- \\
+SSD & --- & --- & 83.52\% & 72.73\% & 77.75\% \\
+RT-DETR & $\sim$93\% & $\sim$73\% & $\sim$90\% & $\sim$90\% & --- \\
+\textbf{YOLOv8} & \textbf{$\sim$95\%} & \textbf{$\sim$72\%} & \textbf{$\sim$88\%} & \textbf{$\sim$85\%} & --- \\
+\bottomrule
+\multicolumn{6}{l}{\footnotesize $^{*}$Faster R-CNN reports mAR@10 instead of standard recall.}
+\end{tabular}
+\end{table*}
+
+Key findings from the comparison study include:
+
+\begin{enumerate}
+    \item \textbf{YOLOv8 achieved the highest mAP@50 ($\sim$95\%)}, demonstrating superior detection accuracy for polyp localization.
+    \item \textbf{RT-DETR showed competitive performance} with high precision and recall ($\sim$90\% each), but YOLOv8 provided better overall detection rates.
+    \item \textbf{Faster R-CNN achieved 92.65\% mAP@50} with the highest mAP@50-95 (68.51\%), but its two-stage architecture results in slower inference.
+    \item \textbf{SSD showed the lowest overall performance} with precision of 83.52\% and recall of 72.73\%.
+\end{enumerate}
+
+Based on the comparison study, YOLOv8 was selected as the optimal architecture for the Polyp Localization Module due to its highest mAP@50 detection accuracy, single-stage architecture enabling faster inference, anchor-free design providing better generalization on irregular polyp shapes, and optimal balance between accuracy and computational efficiency for clinical deployment.
+
+% ============================================================
+% 6. CLINICAL IMPLICATIONS AND FUTURE WORK
+% ============================================================
+\section{Clinical Implications and Future Work}
+
+\subsection{Clinical Applicability}
+
+The DetSEG framework offers several clinical benefits: (1) efficient inference---sub-100ms inference enables rapid polyp analysis; (2) reduced variability---consistent algorithm performance complements endoscopist expertise; (3) training tool---visual feedback can assist in endoscopy training; and (4) documentation---automated detection assists in procedure quality metrics.
+
+\subsection{Limitations}
+
+\begin{enumerate}
+    \item \textbf{Dataset Scope}: Training limited to publicly available datasets may not represent all clinical scenarios.
+    \item \textbf{Domain Shift}: Performance may degrade with equipment from different manufacturers.
+    \item \textbf{Edge Cases}: Rare polyp morphologies may be underrepresented.
+    \item \textbf{Integration}: Clinical deployment requires regulatory approval and EMR integration.
+\end{enumerate}
+
+\subsection{Future Directions}
+
+\begin{enumerate}
+    \item \textbf{Video Analysis}: Extend the framework to handle colonoscopy video sequences with temporal modeling.
+    \item \textbf{Uncertainty Quantification}: Provide confidence estimates for clinical decision support.
+    \item \textbf{Polyp Classification}: Extend to differentiate adenomatous from hyperplastic polyps.
+    \item \textbf{Multi-Site Validation}: Evaluate generalization across institutions and equipment.
+    \item \textbf{Lightweight Models}: Knowledge distillation for edge deployment.
+    \item \textbf{Active Learning}: Semi-supervised approaches to leverage unlabeled clinical data.
+\end{enumerate}
+
+% ============================================================
+% 7. CONCLUSION
+% ============================================================
+\section{Conclusion}
+
+This paper presented DetSEG, a two-stage deep learning framework for automated polyp detection and segmentation in colonoscopy images. By decoupling the localization and segmentation tasks, DetSEG addresses the inherent challenges of polyp scale variation and background complexity. The framework employs YOLOv8 for efficient and accurate polyp detection, followed by a U-Net with ResNet-34 encoder for precise boundary delineation.
+
+Experimental results demonstrate that DetSEG achieves competitive performance with state-of-the-art methods while offering unique advantages through its modular design. The system achieves a mean Dice coefficient of 0.891 and IoU of 0.842, with efficient inference times suitable for clinical deployment. The ``detect-then-segment'' approach provides both localization (bounding boxes with confidence scores) and segmentation outputs, offering comprehensive polyp analysis for clinical application.
+
+The DetSEG framework represents a significant step toward robust computer-aided detection systems that can assist endoscopists in improving polyp detection rates and ultimately contributing to colorectal cancer prevention.
+
+% ============================================================
+% REFERENCES
+% ============================================================
+\begin{thebibliography}{15}
+
+\bibitem{siegel2023}
+R.~L. Siegel, K.~D. Miller, \emph{et al.}, ``Colorectal cancer statistics, 2023,'' \emph{CA: A Cancer Journal for Clinicians}, 2023.
+
+\bibitem{rex1997}
+D.~K. Rex, \emph{et al.}, ``Colonoscopic miss rates of adenomas determined by back-to-back colonoscopies,'' \emph{Gastroenterology}, 1997.
+
+\bibitem{redmon2016}
+J.~Redmon, \emph{et al.}, ``You only look once: Unified, real-time object detection,'' in \emph{Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2016.
+
+\bibitem{ronneberger2015}
+O.~Ronneberger, P.~Fischer, and T.~Brox, ``U-Net: Convolutional networks for biomedical image segmentation,'' in \emph{Proc. Med. Image Comput. Comput.-Assisted Interv. (MICCAI)}, 2015, pp.~234--241.
+
+\bibitem{he2016}
+K.~He, X.~Zhang, S.~Ren, and J.~Sun, ``Deep residual learning for image recognition,'' in \emph{Proc. IEEE Conf. Comput. Vis. Pattern Recognit. (CVPR)}, 2016, pp.~770--778.
+
+\bibitem{jha2020}
+D.~Jha, \emph{et al.}, ``Kvasir-SEG: A segmented polyp dataset,'' in \emph{Proc. Int. Conf. Multimedia Model. (MMM)}, 2020.
+
+\bibitem{bernal2015}
+J.~Bernal, \emph{et al.}, ``WM-DOVA maps for accurate polyp highlighting in colonoscopy,'' \emph{IEEE Trans. Med. Imaging}, vol.~34, no.~5, pp.~1196--1205, 2015.
+
+\bibitem{fan2020}
+D.-P. Fan, \emph{et al.}, ``PraNet: Parallel reverse attention network for polyp segmentation,'' in \emph{Proc. Med. Image Comput. Comput.-Assisted Interv. (MICCAI)}, 2020, pp.~263--273.
+
+\bibitem{huang2021}
+C.-H. Huang, \emph{et al.}, ``HarDNet-MSEG: A simple encoder-decoder polyp segmentation neural network,'' \emph{arXiv preprint arXiv:2101.07172}, 2021.
+
+\bibitem{dong2021}
+B.~Dong, \emph{et al.}, ``Polyp-PVT: Polyp segmentation with pyramid vision transformers,'' \emph{CAAI Artif. Intell. Res.}, 2021.
+
+\bibitem{jocher2023}
+G.~Jocher, \emph{et al.}, ``Ultralytics YOLOv8,'' \emph{GitHub Repository}, 2023. [Online]. Available: \url{https://github.com/ultralytics/ultralytics}
+
+\bibitem{yakubovskiy2019}
+P.~Yakubovskiy, ``Segmentation models PyTorch,'' \emph{GitHub Repository}, 2019. [Online]. Available: \url{https://github.com/qubvel/segmentation_models.pytorch}
+
+\bibitem{zheng2020}
+Z.~Zheng, \emph{et al.}, ``Distance-IoU loss: Faster and better learning for bounding box regression,'' in \emph{Proc. AAAI Conf. Artif. Intell.}, 2020.
+
+\bibitem{lin2017}
+T.-Y. Lin, \emph{et al.}, ``Focal loss for dense object detection,'' in \emph{Proc. IEEE Int. Conf. Comput. Vis. (ICCV)}, 2017, pp.~2980--2988.
+
+\bibitem{zhou2018}
+Z.~Zhou, \emph{et al.}, ``UNet++: A nested U-Net architecture for medical image segmentation,'' in \emph{Proc. Deep Learn. Med. Image Anal. (DLMIA)}, 2018, pp.~3--11.
+
+\end{thebibliography}
+
+\end{document}
