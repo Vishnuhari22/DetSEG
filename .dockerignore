@@ -1,0 +1,39 @@
+# Virtual env & git
+venv/
+.venv/
+.git/
+.gitattributes
+
+# Data & docs (not needed at runtime)
+data/
+docs/
+tests/
+results/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE & OS
+.idea/
+.vscode/
+.DS_Store
+desktop.ini
+Thumbs.db
+
+# Logs & temp
+*.log
+*.tmp
+*.zip
+.gradio/
+
+# Duplicate/unused model weights
+models/detection/weights/last.pt
+models/detection/yolov8s_*
+models/detection/results/
+
+# Website temp directories
+website/processed_videos/
+website/uploads/

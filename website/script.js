@@ -529,7 +529,17 @@ document.addEventListener('DOMContentLoaded', () => {
       statsHTML += `
         <div class="mini-stat deep-scan-badge">
           <div class="mini-stat-value">🔬</div>
-          <div class="mini-stat-label">Deep Scan</div>
+          <div class="mini-stat-label">Deep Scan — Enhanced Models</div>
+        </div>
+      `;
+    }
+
+    // Models used badge
+    if (stats.models_used) {
+      statsHTML += `
+        <div class="mini-stat">
+          <div class="mini-stat-value">🧠</div>
+          <div class="mini-stat-label">${stats.models_used}</div>
         </div>
       `;
     }
@@ -624,7 +634,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const indicator = serverStatus.querySelector('.status-indicator');
         indicator.classList.remove('offline');
         indicator.classList.add('online');
-        serverStatusText.textContent = `Server online — ${data.device?.toUpperCase()} | Models loaded`;
+        const modelsCount = (data.yolo_loaded ? 1 : 0) + (data.unet_loaded ? 1 : 0) +
+          (data.yolo_small_polyp_loaded ? 1 : 0) + (data.unet_upgraded_loaded ? 1 : 0);
+        const deepScanText = data.deep_scan_available ? ' | Deep Scan ✓' : '';
+        serverStatusText.textContent = `Server online — ${data.device?.toUpperCase()} | ${modelsCount} models loaded${deepScanText}`;
         serverStatus.classList.add('connected');
       }
     } catch {

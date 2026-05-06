@@ -20,6 +20,8 @@ import segmentation_models_pytorch as smp
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from ultralytics import YOLO
+from sahi import AutoDetectionModel
+from sahi.predict import get_sliced_prediction
 from PIL import Image
 import time
 import tempfile
@@ -34,38 +36,64 @@ from video_processor import VideoProcessor, VideoMetadata
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 YOLO_PATH = os.path.join(BASE_DIR, 'models', 'detection', 'weights', 'best.pt')
 UNET_PATH = os.path.join(BASE_DIR, 'models', 'segmentation', 'weights', 'unet_best.pth')
+YOLO_SMALL_POLYP_PATH = os.path.join(BASE_DIR, 'models', 'detection', 'weights', 'best_small_polyp.pt')
+UNET_UPGRADED_PATH = os.path.join(BASE_DIR, 'models', 'segmentation', 'weights', 'unet_upgraded.pth')
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Global model variables
 yolo_model = None
 unet_model = None
+yolo_small_polyp_model = None
+unet_upgraded_model = None
+sahi_detection_model = None
 video_processor = None
 
 # ==========================================
 # MODEL LOADING
 # ==========================================
 def load_models():
-    """Load YOLO and U-Net models."""
-    global yolo_model, unet_model, video_processor
+    """Load YOLO and U-Net models (standard + enhanced)."""
+    global yolo_model, unet_model, yolo_small_polyp_model, unet_upgraded_model, sahi_detection_model, video_processor
     
-    # Load YOLO
+    # Standard YOLO
     if not os.path.exists(YOLO_PATH):
         raise FileNotFoundError(f"YOLO model not found at: {YOLO_PATH}")
     yolo_model = YOLO(YOLO_PATH)
     
-    # Load U-Net
+    # Standard U-Net (ResNet-34)
     if not os.path.exists(UNET_PATH):
         raise FileNotFoundError(f"U-Net model not found at: {UNET_PATH}")
-    
     unet_model = smp.Unet(
-        encoder_name="resnet34",
-        encoder_weights=None,
-        in_channels=3,
-        classes=1
+        encoder_name="resnet34", encoder_weights=None, in_channels=3, classes=1
     )
     unet_model.load_state_dict(torch.load(UNET_PATH, map_location=DEVICE))
-    unet_model.to(DEVICE)
-    unet_model.eval()
+    unet_model.to(DEVICE).eval()
+    
+    # Plan 2: Small-polyp YOLO for SAHI deep scan
+    if os.path.exists(YOLO_SMALL_POLYP_PATH):
+        yolo_small_polyp_model = YOLO(YOLO_SMALL_POLYP_PATH)
+        sahi_detection_model = AutoDetectionModel.from_pretrained(
+            model_type="yolov8", model_path=YOLO_SMALL_POLYP_PATH,
+            confidence_threshold=0.20, device=DEVICE
+        )
+        print("  ✓ Plan 2 SAHI deep scan model loaded")
+    else:
+        print(f"  ⚠ Plan 2 model not found, deep scan will use standard YOLO")
+        sahi_detection_model = AutoDetectionModel.from_pretrained(
+            model_type="yolov8", model_path=YOLO_PATH,
+            confidence_threshold=0.25, device=DEVICE
+        )
+    
+    # Plan 3: Upgraded U-Net (EfficientNet-B4)
+    if os.path.exists(UNET_UPGRADED_PATH):
+        unet_upgraded_model = smp.Unet(
+            encoder_name="efficientnet-b4", encoder_weights=None, in_channels=3, classes=1
+        )
+        unet_upgraded_model.load_state_dict(torch.load(UNET_UPGRADED_PATH, map_location=DEVICE))
+        unet_upgraded_model.to(DEVICE).eval()
+        print("  ✓ Plan 3 upgraded segmentation model loaded")
+    else:
+        print(f"  ⚠ Plan 3 model not found, deep scan will use standard U-Net")
     
     # Initialize video processor
     video_processor = VideoProcessor(yolo_model, unet_model, DEVICE)
@@ -75,14 +103,46 @@ def load_models():
 # ==========================================
 # IMAGE PROCESSING PIPELINE
 # ==========================================
-def process_image(image, conf_threshold, iou_threshold, mask_opacity):
+def _run_sahi_detection(img_bgr, conf_threshold=0.25, iou_threshold=0.45):
+    """Run SAHI sliced inference using the Plan 2 specialist model."""
+    effective_conf = max(0.15, conf_threshold - 0.05)
+    sahi_detection_model.confidence_threshold = effective_conf
+    img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+    h, w = img_bgr.shape[:2]
+    min_dim = min(h, w)
+    if min_dim < 640:
+        slice_size, overlap = 256, 0.35
+    elif min_dim < 1280:
+        slice_size, overlap = 384, 0.3
+    else:
+        slice_size, overlap = 512, 0.3
+    result = get_sliced_prediction(
+        image=img_rgb, detection_model=sahi_detection_model,
+        slice_height=slice_size, slice_width=slice_size,
+        overlap_height_ratio=overlap, overlap_width_ratio=overlap,
+        perform_standard_pred=True, postprocess_type="NMS",
+        postprocess_match_threshold=iou_threshold * 0.9, verbose=0
+    )
+    detections = []
+    for pred in result.object_prediction_list:
+        bbox = pred.bbox
+        detections.append((int(bbox.minx), int(bbox.miny), int(bbox.maxx), int(bbox.maxy), float(pred.score.value)))
+    return detections
+
+
+def process_image(image, conf_threshold, iou_threshold, mask_opacity, deep_scan=False):
     """
     Process single image through detection and segmentation pipeline.
+    Deep scan uses Plan 2 YOLO (SAHI) + Plan 3 U-Net (EfficientNet-B4).
     """
     if image is None:
         return None, None, "⚠️ Please upload an image first."
     
     start_time = time.time()
+    
+    # Select models
+    active_seg = unet_upgraded_model if (deep_scan and unet_upgraded_model) else unet_model
+    mode_label = "🔬 Deep Scan (Plan 2 + Plan 3)" if deep_scan else "Standard Scan"
     
     # Convert PIL to numpy array (RGB)
     if isinstance(image, Image.Image):
@@ -99,31 +159,34 @@ def process_image(image, conf_threshold, iou_threshold, mask_opacity):
     draw_img = img_bgr.copy()
     detection_img = img_bgr.copy()
     
-    # YOLO Detection
-    results = yolo_model(img_bgr, conf=conf_threshold, iou=iou_threshold, verbose=False)
+    # YOLO Detection (standard or SAHI deep scan)
+    if deep_scan and sahi_detection_model:
+        detections = _run_sahi_detection(img_bgr, conf_threshold, iou_threshold)
+    else:
+        results = yolo_model(img_bgr, conf=conf_threshold, iou=iou_threshold, verbose=False)
+        detections = []
+        for r in results:
+            for box in r.boxes:
+                x1, y1, x2, y2 = box.xyxy[0].cpu().numpy().astype(int)
+                conf = box.conf[0].item()
+                detections.append((x1, y1, x2, y2, conf))
     
-    detections = []
-    for r in results:
-        for box in r.boxes:
-            x1, y1, x2, y2 = box.xyxy[0].cpu().numpy().astype(int)
-            conf = box.conf[0].item()
-            detections.append((x1, y1, x2, y2, conf))
-            
-            cv2.rectangle(detection_img, (x1, y1), (x2, y2), (0, 255, 0), 3)
-            cv2.putText(detection_img, f"Polyp: {conf:.2%}", (x1, y1 - 10),
-                       cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+    for (x1, y1, x2, y2, conf) in detections:
+        cv2.rectangle(detection_img, (x1, y1), (x2, y2), (0, 255, 0), 3)
+        cv2.putText(detection_img, f"Polyp: {conf:.2%}", (x1, y1 - 10),
+                   cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
     
     detection_img_rgb = cv2.cvtColor(detection_img, cv2.COLOR_BGR2RGB)
     
     if not detections:
         elapsed = time.time() - start_time
         status = f"""
-### 🔍 Analysis Complete
+### 🔍 Analysis Complete ({mode_label})
 - **Processing Time:** {elapsed:.2f}s
 - **Device:** {DEVICE.upper()}
 - **Result:** No polyps detected
 
-💡 **Tip:** Try lowering the confidence threshold to detect more subtle findings.
+💡 **Tip:** Try lowering the confidence threshold or enabling Deep Scan.
 """
         return detection_img_rgb, img_rgb, status
     
@@ -148,7 +211,7 @@ def process_image(image, conf_threshold, iou_threshold, mask_opacity):
         input_tensor = augmented['image'].unsqueeze(0).to(DEVICE)
         
         with torch.no_grad():
-            logits = unet_model(input_tensor)
+            logits = active_seg(input_tensor)
             pred = torch.sigmoid(logits) > 0.5
             pred_np = pred[0, 0].cpu().numpy().astype(np.uint8)
         
@@ -178,7 +241,7 @@ def process_image(image, conf_threshold, iou_threshold, mask_opacity):
     coverage = (mask_pixels / (h * w)) * 100
     
     status = f"""
-### ✅ Analysis Complete
+### ✅ Analysis Complete ({mode_label})
 
 | Metric | Value |
 |--------|-------|
@@ -186,6 +249,7 @@ def process_image(image, conf_threshold, iou_threshold, mask_opacity):
 | **Processing Time** | {elapsed:.2f}s |
 | **Device** | {DEVICE.upper()} |
 | **Mask Coverage** | {coverage:.2f}% |
+| **Scan Mode** | {mode_label} |
 
 #### Detection Details:
 """
@@ -411,6 +475,11 @@ def create_interface():
                                 label="Mask Opacity",
                                 info="Segmentation overlay visibility"
                             )
+                            img_deep_scan = gr.Checkbox(
+                                value=False,
+                                label="🔬 Deep Scan",
+                                info="Enhanced detection using Plan 2 YOLO (SAHI) + Plan 3 U-Net (EfficientNet-B4). Slower but catches small/flat polyps."
+                            )
                         
                         img_analyze_btn = gr.Button(
                             "🚀 Analyze Image",
@@ -523,7 +592,7 @@ def create_interface():
         # Event handlers
         img_analyze_btn.click(
             fn=process_image,
-            inputs=[input_image, img_conf_slider, img_iou_slider, img_opacity_slider],
+            inputs=[input_image, img_conf_slider, img_iou_slider, img_opacity_slider, img_deep_scan],
             outputs=[img_detection_output, img_seg_output, img_status_output]
         )
         

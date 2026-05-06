@@ -5,6 +5,7 @@ Serves the static website and provides API endpoints for AI inference.
 """
 
 from flask import Flask, request, jsonify, send_from_directory, send_file
+from flask_cors import CORS
 import os
 import sys
 import cv2
@@ -31,13 +32,19 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WEBSITE_DIR = os.path.join(BASE_DIR, 'website')
 YOLO_PATH = os.path.join(BASE_DIR, 'models', 'detection', 'weights', 'best.pt')
 UNET_PATH = os.path.join(BASE_DIR, 'models', 'segmentation', 'weights', 'unet_best.pth')
+YOLO_SMALL_POLYP_PATH = os.path.join(BASE_DIR, 'models', 'detection', 'weights', 'best_small_polyp.pt')
+UNET_UPGRADED_PATH = os.path.join(BASE_DIR, 'models', 'segmentation', 'weights', 'unet_upgraded.pth')
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 app = Flask(__name__, static_folder=WEBSITE_DIR)
+CORS(app)
 
-# Global model variables
+# Global model variables — Standard models (fast, normal scan)
 yolo_model = None
 unet_model = None
+# Enhanced models — Plan 2 small-polyp YOLO + Plan 3 upgraded U-Net (deep scan)
+yolo_small_polyp_model = None
+unet_upgraded_model = None
 sahi_detection_model = None
 
 # Processed video storage (keeps last N videos in memory for serving)
@@ -48,27 +55,17 @@ MAX_STORED_VIDEOS = 3
 # MODEL LOADING
 # ==========================================
 def load_models():
-    global yolo_model, unet_model
+    global yolo_model, unet_model, yolo_small_polyp_model, unet_upgraded_model, sahi_detection_model
 
+    # --- Standard Models (Normal Scan) ---
     print(f"  Loading YOLO from: {YOLO_PATH}")
     if not os.path.exists(YOLO_PATH):
         raise FileNotFoundError(f"YOLO model not found at: {YOLO_PATH}")
     yolo_model = YOLO(YOLO_PATH)
 
-    # Wrap YOLO model for SAHI sliced inference
-    global sahi_detection_model
-    sahi_detection_model = AutoDetectionModel.from_pretrained(
-        model_type="yolov8",
-        model_path=YOLO_PATH,
-        confidence_threshold=0.25,
-        device=DEVICE
-    )
-    print("SAHI detection model wrapped successfully!")
-
-    print(f"  Loading U-Net from: {UNET_PATH}")
+    print(f"  Loading U-Net (ResNet-34) from: {UNET_PATH}")
     if not os.path.exists(UNET_PATH):
         raise FileNotFoundError(f"U-Net model not found at: {UNET_PATH}")
-
     unet_model = smp.Unet(
         encoder_name="resnet34",
         encoder_weights=None,
@@ -79,35 +76,91 @@ def load_models():
     unet_model.to(DEVICE)
     unet_model.eval()
 
-    print("Models loaded successfully!")
+    # --- Enhanced Models (Deep Scan) ---
+    # Plan 2: Small-polyp YOLO — dedicated model for SAHI deep scan
+    if os.path.exists(YOLO_SMALL_POLYP_PATH):
+        print(f"  Loading Plan 2 small-polyp YOLO from: {YOLO_SMALL_POLYP_PATH}")
+        yolo_small_polyp_model = YOLO(YOLO_SMALL_POLYP_PATH)
+        # Wrap Plan 2 model for SAHI sliced inference (instead of standard YOLO)
+        sahi_detection_model = AutoDetectionModel.from_pretrained(
+            model_type="yolov8",
+            model_path=YOLO_SMALL_POLYP_PATH,
+            confidence_threshold=0.20,
+            device=DEVICE
+        )
+        print("  ✓ Plan 2 SAHI deep scan model ready (small-polyp specialist)")
+    else:
+        print(f"  ⚠ Plan 2 model not found at {YOLO_SMALL_POLYP_PATH}, falling back to standard YOLO for SAHI")
+        sahi_detection_model = AutoDetectionModel.from_pretrained(
+            model_type="yolov8",
+            model_path=YOLO_PATH,
+            confidence_threshold=0.25,
+            device=DEVICE
+        )
+
+    # Plan 3: Upgraded U-Net with EfficientNet-B4 encoder
+    if os.path.exists(UNET_UPGRADED_PATH):
+        print(f"  Loading Plan 3 upgraded U-Net (EfficientNet-B4) from: {UNET_UPGRADED_PATH}")
+        unet_upgraded_model = smp.Unet(
+            encoder_name="efficientnet-b4",
+            encoder_weights=None,
+            in_channels=3,
+            classes=1
+        )
+        unet_upgraded_model.load_state_dict(torch.load(UNET_UPGRADED_PATH, map_location=DEVICE))
+        unet_upgraded_model.to(DEVICE)
+        unet_upgraded_model.eval()
+        print("  ✓ Plan 3 upgraded segmentation model ready")
+    else:
+        print(f"  ⚠ Plan 3 model not found at {UNET_UPGRADED_PATH}, deep scan will use standard U-Net")
+
+    print("\n  All models loaded successfully!")
+    print(f"  Normal scan: YOLOv8 + U-Net (ResNet-34)")
+    print(f"  Deep scan:   Plan 2 YOLO (SAHI) + Plan 3 U-Net (EfficientNet-B4)")
 
 # ==========================================
 # SAHI DEEP SCAN DETECTION
 # ==========================================
 def run_sahi_detection(img_bgr, conf_threshold=0.25, iou_threshold=0.45):
-    """Run SAHI sliced inference for enhanced small/multiple polyp detection."""
-    # Update confidence threshold for this run
-    sahi_detection_model.confidence_threshold = conf_threshold
+    """Run enhanced SAHI sliced inference using the Plan 2 small-polyp specialist model.
+    
+    Uses multi-scale adaptive slicing:
+    - Full image prediction for large polyps
+    - Sliced prediction with adaptive tile sizes for small/flat polyps
+    - Lower confidence threshold to catch subtle polyps
+    """
+    # Use a slightly lower threshold for the specialist model to catch subtle polyps
+    effective_conf = max(0.15, conf_threshold - 0.05)
+    sahi_detection_model.confidence_threshold = effective_conf
 
     # Convert BGR to RGB — SAHI processes images in RGB format
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     h, w = img_bgr.shape[:2]
+    min_dim = min(h, w)
 
-    # Use adaptive slice size: ~1/2 of the smaller dimension, clamped between 256-640
-    slice_size = max(256, min(640, min(h, w) // 2))
+    # Adaptive slice size based on image resolution
+    if min_dim < 640:
+        slice_size = 256
+        overlap = 0.35
+    elif min_dim < 1280:
+        slice_size = 384
+        overlap = 0.3
+    else:
+        slice_size = 512
+        overlap = 0.3
 
-    print(f"Deep Scan: image={w}x{h}, slice={slice_size}, conf={conf_threshold}, iou={iou_threshold}")
+    print(f"Deep Scan: image={w}x{h}, slice={slice_size}, overlap={overlap}, conf={effective_conf}, iou={iou_threshold}")
 
     result = get_sliced_prediction(
         image=img_rgb,
         detection_model=sahi_detection_model,
         slice_height=slice_size,
         slice_width=slice_size,
-        overlap_height_ratio=0.3,
-        overlap_width_ratio=0.3,
+        overlap_height_ratio=overlap,
+        overlap_width_ratio=overlap,
         perform_standard_pred=True,
         postprocess_type="NMS",
-        postprocess_match_threshold=iou_threshold,
+        postprocess_match_threshold=iou_threshold * 0.9,  # Slightly lower to keep nearby distinct detections
         verbose=0
     )
 
@@ -122,15 +175,26 @@ def run_sahi_detection(img_bgr, conf_threshold=0.25, iou_threshold=0.45):
             "confidence": float(pred.score.value)
         })
 
-    print(f"Deep Scan result: {len(detections)} polyps detected")
+    print(f"Deep Scan result: {len(detections)} polyps detected (Plan 2 model)")
     return detections
 
 
 # ==========================================
 # IMAGE PROCESSING
 # ==========================================
+def _get_segmentation_model(deep_scan=False):
+    """Return the appropriate segmentation model based on scan mode."""
+    if deep_scan and unet_upgraded_model is not None:
+        return unet_upgraded_model
+    return unet_model
+
+
 def process_image_pipeline(image_bytes, conf_threshold=0.25, iou_threshold=0.45, mask_opacity=0.4, deep_scan=False):
-    """Process an image through YOLO detection + U-Net segmentation."""
+    """Process an image through YOLO detection + U-Net segmentation.
+    
+    Normal scan: Standard YOLO + ResNet-34 U-Net (fast)
+    Deep scan:   Plan 2 small-polyp YOLO via SAHI + Plan 3 EfficientNet-B4 U-Net (thorough)
+    """
     start_time = time.time()
 
     # Decode image
@@ -142,7 +206,11 @@ def process_image_pipeline(image_bytes, conf_threshold=0.25, iou_threshold=0.45,
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     h, w = img_bgr.shape[:2]
 
-    # YOLO Detection (standard or SAHI deep scan)
+    # Select model pair based on scan mode
+    active_seg_model = _get_segmentation_model(deep_scan)
+    model_info = "Plan 2 YOLO + Plan 3 U-Net" if deep_scan else "Standard YOLO + U-Net"
+
+    # YOLO Detection (standard or SAHI deep scan with Plan 2 model)
     if deep_scan:
         detections = run_sahi_detection(img_bgr, conf_threshold, iou_threshold)
     else:
@@ -172,10 +240,11 @@ def process_image_pipeline(image_bytes, conf_threshold=0.25, iou_threshold=0.45,
             "processing_time": round(elapsed, 2),
             "device": DEVICE,
             "deep_scan": deep_scan,
+            "models_used": model_info,
             "detections": []
         }
 
-    # U-Net Segmentation
+    # U-Net Segmentation (standard or upgraded based on scan mode)
     transform = A.Compose([
         A.Resize(256, 256),
         A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
@@ -201,7 +270,7 @@ def process_image_pipeline(image_bytes, conf_threshold=0.25, iou_threshold=0.45,
         input_tensor = augmented['image'].unsqueeze(0).to(DEVICE)
 
         with torch.no_grad():
-            logits = unet_model(input_tensor)
+            logits = active_seg_model(input_tensor)
             pred = torch.sigmoid(logits) > 0.5
             pred_np = pred[0, 0].cpu().numpy().astype(np.uint8)
 
@@ -237,13 +306,18 @@ def process_image_pipeline(image_bytes, conf_threshold=0.25, iou_threshold=0.45,
         "processing_time": round(elapsed, 2),
         "device": DEVICE,
         "deep_scan": deep_scan,
+        "models_used": model_info,
         "mask_coverage": round(coverage, 2),
         "detections": detections
     }
 
 
 def process_video_pipeline(video_path, conf_threshold=0.25, iou_threshold=0.45, mask_opacity=0.4, skip_frames=0, deep_scan=False, alert_cooldown=3.0):
-    """Process a video through the detection + segmentation pipeline."""
+    """Process a video through the detection + segmentation pipeline.
+    
+    Normal scan: Standard YOLO + ResNet-34 U-Net (fast)
+    Deep scan:   Plan 2 small-polyp YOLO via SAHI + Plan 3 EfficientNet-B4 U-Net (thorough)
+    """
     start_time = time.time()
 
     cap = cv2.VideoCapture(video_path)
@@ -254,6 +328,10 @@ def process_video_pipeline(video_path, conf_threshold=0.25, iou_threshold=0.45, 
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+
+    # Select segmentation model based on scan mode
+    active_seg_model = _get_segmentation_model(deep_scan)
+    model_info = "Plan 2 YOLO + Plan 3 U-Net" if deep_scan else "Standard YOLO + U-Net"
 
     # Setup writer
     output_dir = tempfile.mkdtemp()
@@ -294,7 +372,7 @@ def process_video_pipeline(video_path, conf_threshold=0.25, iou_threshold=0.45, 
 
             h, w = frame.shape[:2]
 
-            # Detection (standard or SAHI deep scan)
+            # Detection (standard or SAHI deep scan with Plan 2 model)
             if deep_scan:
                 sahi_dets = run_sahi_detection(frame, conf_threshold, iou_threshold)
                 detections = [(d["x1"], d["y1"], d["x2"], d["y2"], d["confidence"]) for d in sahi_dets]
@@ -323,7 +401,7 @@ def process_video_pipeline(video_path, conf_threshold=0.25, iou_threshold=0.45, 
                     input_tensor = augmented['image'].unsqueeze(0).to(DEVICE)
 
                     with torch.no_grad():
-                        logits = unet_model(input_tensor)
+                        logits = active_seg_model(input_tensor)
                         pred = torch.sigmoid(logits) > 0.5
                         pred_np = pred[0, 0].cpu().numpy().astype(np.uint8)
 
@@ -386,6 +464,7 @@ def process_video_pipeline(video_path, conf_threshold=0.25, iou_threshold=0.45, 
         "max_confidence": round(float(max(all_confidences) * 100), 1) if all_confidences else 0,
         "device": DEVICE,
         "deep_scan": deep_scan,
+        "models_used": model_info,
         "alert_timestamps": alert_timestamps,
         "alert_count": len(alert_timestamps),
     }
@@ -519,12 +598,32 @@ def health():
         "status": "ok",
         "device": DEVICE,
         "yolo_loaded": yolo_model is not None,
-        "unet_loaded": unet_model is not None
+        "unet_loaded": unet_model is not None,
+        "yolo_small_polyp_loaded": yolo_small_polyp_model is not None,
+        "unet_upgraded_loaded": unet_upgraded_model is not None,
+        "deep_scan_available": sahi_detection_model is not None and (
+            yolo_small_polyp_model is not None or yolo_model is not None
+        ),
+        "models": {
+            "normal_scan": "YOLOv8 + U-Net (ResNet-34)",
+            "deep_scan": "Plan 2 YOLO (SAHI) + Plan 3 U-Net (EfficientNet-B4)" if yolo_small_polyp_model else "Standard YOLO (SAHI) + U-Net (ResNet-34)"
+        }
     })
 
 
 # ==========================================
-# MAIN
+# MODEL AUTO-LOADING (for gunicorn / production)
+# ==========================================
+print("\nLoading models...")
+try:
+    load_models()
+except Exception as e:
+    print(f"Error loading models: {e}")
+    # Don't exit — allows the health endpoint to report status
+
+
+# ==========================================
+# MAIN (local development)
 # ==========================================
 if __name__ == '__main__':
     print("=" * 60)
@@ -535,13 +634,7 @@ if __name__ == '__main__':
     print(f"Device: {DEVICE}")
     print("=" * 60)
 
-    print("\nLoading models...")
-    try:
-        load_models()
-    except Exception as e:
-        print(f"Error loading models: {e}")
-        sys.exit(1)
-
-    print(f"\nStarting server at http://localhost:5000")
+    port = int(os.environ.get('PORT', 5000))
+    print(f"\nStarting server at http://localhost:{port}")
     print("   Press Ctrl+C to stop.\n")
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=port, debug=False)
